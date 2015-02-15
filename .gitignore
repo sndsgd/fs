@@ -1,0 +1,5 @@
+docs
+vendor
+composer.lock
+tests/coverage-clover.xml
+tests/coverage-coveralls.json
