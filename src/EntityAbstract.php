@@ -224,19 +224,25 @@ abstract class EntityAbstract
       return $path;
    }
 
-   public function getRelativePath($to)
+   /**
+    * Get the relative path from the current path to another
+    * 
+    * @param string $path
+    * @return string
+    */
+   public function getRelativePath($path)
    {
       $from = $this->path;
-      $i = 0;
-      $minlen = min(strlen($from), strlen($to));
-      while ($i < $minlen && $from{$i} === $to{$i}) {
-         $i++;
+      $steps = 0;
+      $minlen = min(strlen($from), strlen($path));
+      while ($steps < $minlen && $from{$steps} === $path{$steps}) {
+         $steps++;
       }
 
-      $from = substr($from, $i);
-      $to = substr($to, $i);
+      $from = substr($from, $steps);
+      $path = substr($path, $steps);
       $fparts = explode("/", $from);
-      return str_repeat("../", count($fparts) - 1).$to;
+      return str_repeat("../", count($fparts) - 1).$path;
    }
 }
 
