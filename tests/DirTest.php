@@ -62,5 +62,27 @@ class DirTest extends TestCase
       $dir = new Dir($this->getPath("root/dir-no-rw/nope"));
       $this->assertFalse($dir->prepareWrite());
    }
+
+   /**
+    * @covers ::isEmpty
+    */
+   public function testIsEmpty()
+   {
+      $dir = new Dir($this->getPath("root"));
+      $this->assertFalse($dir->isEmpty());
+
+      $dir = new Dir($this->getPath("root/test/emptydir"));
+      $this->assertTrue($dir->isEmpty());
+   }
+
+   /**
+    * @covers ::isEmpty
+    * @expectedException Exception
+    */
+   public function testIsEmptyException()
+   {
+      $dir = new Dir($this->getPath("root/dir-no-rw"));
+      $dir->isEmpty();
+   }
 }
 

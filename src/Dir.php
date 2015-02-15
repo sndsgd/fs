@@ -2,6 +2,8 @@
 
 namespace sndsgd\fs;
 
+use \Exception;
+
 
 class Dir extends EntityAbstract
 {
@@ -41,6 +43,23 @@ class Dir extends EntityAbstract
       else {
          return true;
       }
+   }
+
+   /**
+    * Determine if a directory is empty
+    * 
+    * @return boolean 
+    * @throws Exception If the directory does not exist or is not readable
+    */
+   public function isEmpty()
+   {
+      if ($this->test(self::EXISTS | self::READABLE) === false) {
+         throw new Exception(
+            "failed to determine if a directory is empty; ".$this->getError()
+         );
+      }
+
+      return count(scandir($this->path)) === 2;
    }
 }
 
