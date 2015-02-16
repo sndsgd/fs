@@ -10,6 +10,24 @@ A filesystem toolkit for PHP.
 
 > Note: this library will be merged into [sndsgd/util](https://github.com/sndsgd/sndsgd-util) as soon as it can replace the functionality in `sndsgd\Path`, `sndsgd\File`, and `sndsgd\Dir`.
 
+## Why?
+
+The classes in `sndsgd\fs` attempt to simplify tedious filesystem tasks.
+
+```php
+use \sndsgd\fs\Dir;
+use \sndsgd\fs\File;
+
+# lets assume /tmp/some doesn't exist
+$path = "/tmp/some/deep/path/file.txt";
+
+# write to a file that doesn't exist in a directory that doesn't exist
+$file = new File($path);
+if ($file->write("the contents...") === false) {
+   throw new Exception($file->getError());
+}
+```
+
 
 ## Requirements
 
