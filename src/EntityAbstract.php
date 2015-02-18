@@ -177,6 +177,16 @@ abstract class EntityAbstract
    }
 
    /**
+    * Determine whether or not a path is absolute
+    * 
+    * @return string
+    */
+   public function isAbsolute()
+   {
+      return $this->path{0} === DIRECTORY_SEPARATOR;
+   }
+
+   /**
     * Normalize a path to remove dots
     * 
     * @return string
@@ -215,6 +225,9 @@ abstract class EntityAbstract
     */
    public function normalizeTo($dir)
    {
+      if ($this->isAbsolute()) {
+         return $this->path;   
+      }
       $this->path = "$dir/$this->path";
       return $this->normalize();
    }

@@ -137,6 +137,21 @@ class EntityAbstractTest extends TestCase
    }
 
    /**
+    * @covers ::isAbsolute
+    */
+   public function testIsAbsolute()
+   {
+      $mock = $this->getMockedEntity("/file.txt");
+      $this->assertTrue($mock->isAbsolute());
+
+      $mock = $this->getMockedEntity(".file.txt");
+      $this->assertFalse($mock->isAbsolute());
+
+      $mock = $this->getMockedEntity("\file.txt");
+      $this->assertFalse($mock->isAbsolute());
+   }
+
+   /**
     * @covers ::normalize
     * @covers ::normalizeLeadingDots
     */
@@ -179,12 +194,15 @@ class EntityAbstractTest extends TestCase
       $this->assertEquals($dir, $mock->normalize());
    }
 
+   /**
+    * @covers ::normalizeTo
+    */
    public function testNormalizeTo()
    {
       $dir = "/test/path";
 
       $mock = $this->getMockedEntity("/file.txt");
-      $this->assertEquals("/test/path/file.txt", $mock->normalizeTo($dir));
+      $this->assertEquals("/file.txt", $mock->normalizeTo($dir));
 
       $mock = $this->getMockedEntity("../file.txt");
       $this->assertEquals("/test/file.txt", $mock->normalizeTo($dir));
