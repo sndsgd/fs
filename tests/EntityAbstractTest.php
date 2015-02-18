@@ -3,6 +3,7 @@
 namespace sndsgd\fs;
 
 use \ReflectionClass;
+use \org\bovigo\vfs\vfsStream;
 use \sndsgd\Str;
 
 
@@ -73,8 +74,10 @@ class EntityAbstractTest extends TestCase
       $this->mock->setError($message);
       $this->assertEquals($message, $this->mock->getError());
 
+
+
       # force an error to be created
-      @file_put_contents($this->getPath("root/file-no-rw"), "test");
+      @file_put_contents(vfsStream::url("root/dir-no-rw/nope.txt"), "test");
       $message = "file write failure";
       $this->mock->setError($message);
       $begin = "$message; file_put_contents";
@@ -174,6 +177,20 @@ class EntityAbstractTest extends TestCase
 
       $mock = $this->getMockedEntity("../");
       $this->assertEquals($dir, $mock->normalize());
+   }
+
+   public function testNormalizeTo()
+   {
+      $dir = "/test/path";
+
+      $mock = $this->getMockedEntity("/file.txt");
+      $this->assertEquals("/test/path/file.txt", $mock->normalizeTo($dir));
+
+      $mock = $this->getMockedEntity("../file.txt");
+      $this->assertEquals("/test/file.txt", $mock->normalizeTo($dir));
+
+      $mock = $this->getMockedEntity(".file.txt");
+      $this->assertEquals("/test/path/.file.txt", $mock->normalizeTo($dir));
    }
 
    /**

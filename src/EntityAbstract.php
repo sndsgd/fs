@@ -207,6 +207,18 @@ abstract class EntityAbstract
       return $this->path;
    }
 
+   /**
+    * Normalize the path to a directory
+    *
+    * @param string $dir
+    * @return string
+    */
+   public function normalizeTo($dir)
+   {
+      $this->path = "$dir/$this->path";
+      return $this->normalize();
+   }
+
    private function normalizeLeadingDots($path)
    {
       if ($path === ".") {
