@@ -257,17 +257,21 @@ abstract class EntityAbstract
     */
    public function getRelativePath($path)
    {
+      $path = (string) $path;
       $from = $this->path;
       $steps = 0;
-      $minlen = min(strlen($from), strlen($path));
-      while ($steps < $minlen && $from{$steps} === $path{$steps}) {
-         $steps++;
+      $fromParts = explode("/", $from);
+      $toParts = explode("/", $path);
+      $max = max(count($fromParts), count($toParts));
+      for ($i=0; $i<$max; $i++) {
+         if ($fromParts[$i] !== $toParts[$i]) {
+            break;
+         }
       }
 
-      $from = substr($from, $steps);
-      $path = substr($path, $steps);
-      $fparts = explode("/", $from);
-      return str_repeat("../", count($fparts) - 1).$path;
+      $len = count($fromParts) - $i - 1;
+      $path = array_slice($toParts, $i);
+      return str_repeat("../", $len).implode("/", $path);
    }
 }
 

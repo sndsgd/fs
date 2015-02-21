@@ -227,6 +227,12 @@ class EntityAbstractTest extends TestCase
       $expect = "../../x/y";
       $mock = $this->getMockedEntity($from);
       $this->assertEquals($expect, $mock->getRelativePath($to));
+
+      $from = "/la/dee/daa/123-music/";
+      $to = "/la/dee/daa/123-some/other/path.txt";
+      $expect = "../123-some/other/path.txt";
+      $mock = $this->getMockedEntity($from);
+      $this->assertEquals($expect, $mock->getRelativePath($to));
    }
 }
 
