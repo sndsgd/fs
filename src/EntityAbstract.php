@@ -32,6 +32,18 @@ abstract class EntityAbstract
    }
 
    /**
+    * Get an entity instance and normalize the path
+    * @param string $path
+    * @return \sndsgd\fs\Dir|\sndsgd\fs\File
+    */
+   public static function get($path)
+   {
+      $instance = new static($path);
+      $instance->normalize();
+      return $instance;
+   }
+
+   /**
     * The path as provided to the constructor
     * 
     * @var string

@@ -11,6 +11,17 @@ use \sndsgd\Str;
 class FileTest extends TestCase
 {
    /**
+    * @covers ::get
+    * @covers \sndsgd\fs\EntityAbstract::get
+    */
+   public function testGet()
+   {
+      $file = File::get("./some/file.txt");
+      $expect = getcwd()."/some/file.txt";
+      $this->assertEquals($expect, $file->getPath());
+   }
+
+   /**
     * @covers ::formatSize
     * @expectedException InvalidArgumentException
     */
