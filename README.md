@@ -8,7 +8,6 @@
 
 A filesystem toolkit for PHP.
 
-> Note: this library will be merged into [sndsgd/util](https://github.com/sndsgd/sndsgd-util) as soon as it can replace the functionality in `sndsgd\Path`, `sndsgd\File`, and `sndsgd\Dir`.
 
 ## Why?
 
