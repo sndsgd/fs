@@ -90,7 +90,7 @@ abstract class EntityAbstract
    /**
     * Set an error message
     *
-    * @param string $message
+    * @param string $msg
     */
    public function setError($msg)
    {
@@ -162,7 +162,7 @@ abstract class EntityAbstract
     * 
     * @return boolean
     */
-   public abstract function canWrite();
+   abstract public function canWrite();
 
    /**
     * Prepare an entity for writing by creating non existing parents
@@ -271,7 +271,6 @@ abstract class EntityAbstract
    {
       $path = (string) $path;
       $from = $this->path;
-      $steps = 0;
       $fromParts = explode("/", $from);
       $toParts = explode("/", $path);
       $max = max(count($fromParts), count($toParts));

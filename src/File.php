@@ -137,7 +137,9 @@ class File extends EntityAbstract
     * @param integer $precision The number of decimal places to return
     * @param string $point The decimal point
     * @param string $sep The thousands separator
+    * @return string|integer|false
     * @return string|integer The formatted filesize
+    * @return false If the file could not read or the stat failed
     */
    public function getSize($precision = 0, $point = ".", $sep = ",")
    {
