@@ -61,5 +61,50 @@ class Dir extends EntityAbstract
 
       return count(scandir($this->path)) === 2;
    }
+
+   /**
+    * get a list of the directory children
+    * 
+    * @return array<string>|boolean
+    */
+   public function getList()
+   {
+      return array_diff(scandir($this->path), [".", ".."]);
+   }
+
+   /**
+    * Recursively remove the directory
+    * 
+    * @return boolean
+    */
+   public function remove()
+   { 
+      if ($this->test(self::EXISTS | self::READABLE | self::WRITABLE) === false) {
+         $this->error = "failed to remove directory; {$this->error}";
+         return false;
+      }
+
+      foreach ($this->getList() as $name) {
+         $path = "{$this->path}/$name";
+         if (is_dir($path)) {
+            $dir = new self($path);
+            if ($dir->remove() === false) {
+               $this->error = $dir->getError();
+               return false;
+            }
+         }
+         else if (@unlink($path) === false) {
+            $this->setError("failed to remove file '$path'");
+            return false;
+         }
+      }
+
+      if (@rmdir($this->path) === false) {
+         $this->setError("failed to remove directory '{$this->path}'");
+         return false;
+      }
+
+      return true;
+   }
 }
 
