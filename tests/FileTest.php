@@ -2,6 +2,7 @@
 
 namespace sndsgd\fs;
 
+use \org\bovigo\vfs\vfsStream;
 use \sndsgd\Str;
 
 
@@ -48,6 +49,23 @@ class FileTest extends TestCase
       $this->assertEquals("1 MB", File::formatSize(1234567, 0));
       $this->assertEquals("1.18 MB", File::formatSize(1234567, 2));
       $this->assertEquals("1.1498 GB", File::formatSize(1234567890, 4));
+   }
+
+   /**
+    * @covers nothing
+    */
+   protected function createTestFile()
+   {
+      $rand= Str::random(10);
+      $path = vfsStream::url("root/$rand.txt");
+      $fp = fopen($path, "w");
+      $bytes = 0;
+      $len = rand(100, 200);
+      for ($i=0; $i<$len; $i++) {
+         $bytes += fwrite($fp, Str::random(rand(5000, 10000)).PHP_EOL);
+      }
+      fclose($fp);
+      return [$path, $bytes, $len];
    }
 
    /**
@@ -152,6 +170,28 @@ class FileTest extends TestCase
 
       $file = new File($this->getPath("root/dir-no-rw/file.txt"));
       $this->assertFalse($file->canWrite());
+   }
+
+   /**
+    * @covers ::getExtension
+    */
+   public function testGetExtension()
+   {
+      $file = new File("file.txt");
+      $this->assertEquals("txt", $file->getExtension());
+
+      $file = new File("/some/path/file.txt");
+      $this->assertEquals("txt", $file->getExtension());
+
+      $file = new File("file");
+      $this->assertNull($file->getExtension());
+      $this->assertSame("", $file->getExtension(""));
+
+      $file = new File(".hidden");
+      $this->assertNull($file->getExtension());
+
+      $file = new File(".hidden.ext");
+      $this->assertEquals("ext", $file->getExtension());
    }
 
    /**
@@ -286,6 +326,16 @@ class FileTest extends TestCase
 
       $mock->method("test")->willReturn(true);
       $this->assertFalse($mock->read());
+   }
+
+   /**
+    * @covers ::getLineCount
+    */
+   public function testGetLineCount()
+   {
+      list($path, $bytes, $lines) = $this->createTestFile();
+      $file = new File($path);
+      $this->assertEquals($lines, $file->getLineCount());
    }
 }
 

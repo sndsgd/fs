@@ -84,6 +84,19 @@ class File extends EntityAbstract
    }
 
    /**
+    * @param string $default The value to return when no extension exists
+    * @return string|null
+    */
+   public function getExtension($default = null)
+   {
+      $filename = basename($this->path);
+      $extpos = strrpos($filename, ".");
+      return ($extpos === false || $extpos === 0)
+         ? $default 
+         : substr($filename, $extpos + 1);
+   }
+
+   /**
     * Separate a filename and extension
     * 
     * bug (??) with pathinfo(): 
@@ -182,6 +195,23 @@ class File extends EntityAbstract
          $this->setError("read operation failed on '{$this->path}'");
          return false;
       }
+      return $ret;
+   }
+
+   /**
+    * Get the number of lines in the file
+    * 
+    * @return integer
+    */
+   public function getLineCount()
+   {
+      $ret = 0;
+      $fh = fopen($this->path, "r");
+      while (!feof($fh)) {
+         $buffer = fread($fh, 8192);
+         $ret += substr_count($buffer, PHP_EOL);
+      }
+      fclose($fh);
       return $ret;
    }
 }
