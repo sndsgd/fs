@@ -48,28 +48,3 @@ class TestCase extends \PHPUnit_Framework_TestCase
 }
 
 
-
-class VfsStreamFailFile extends \org\bovigo\vfs\vfsStreamFile
-{
-   public $fail = null;
-
-   public function getContent()
-   {
-      var_dump("get content");
-      return ($this->fail === true) ? null : parent::getContent();
-   }
-
-   public function open()
-   {
-      var_dump($this->fail);
-      if ($this->fail == "open") {
-         var_dump('triggering error');
-         trigger_error("failed to open file", E_USER_WARNING);
-      }
-      else {
-         parent::open();   
-      }
-   }
-}
-
-
