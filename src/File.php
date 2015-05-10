@@ -84,6 +84,17 @@ class File extends EntityAbstract
    }
 
    /**
+    * Get the file's parent directory
+    *
+    * @aliasof ::getParent
+    * @return \sndsgd\fs\Dir
+    */
+   public function getDir()
+   {
+      return $this->getParent();
+   }
+
+   /**
     * @param string $default The value to return when no extension exists
     * @return string|null
     */

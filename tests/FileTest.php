@@ -108,6 +108,18 @@ class FileTest extends TestCase
    }
 
    /**
+    * @covers ::getDir
+    * @covers ::getParent
+    */
+   public function testGetDir()
+   {
+      $file = new File("/test/dir/file.txt");
+      $dir = $file->getDir();
+      $this->assertInstanceOf("sndsgd\\fs\\Dir", $dir);
+      $this->assertEquals("/test/dir", $dir->getPath());
+   }
+
+   /**
     * @covers ::getSize
     * @expectedException
     */
