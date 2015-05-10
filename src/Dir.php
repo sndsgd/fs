@@ -3,6 +3,7 @@
 namespace sndsgd\fs;
 
 use \Exception;
+use \InvalidArgumentException;
 
 
 class Dir extends EntityAbstract
@@ -43,6 +44,23 @@ class Dir extends EntityAbstract
       else {
          return true;
       }
+   }
+
+   /**
+    * Get an instance of \sndsgd\fs\File for a file in this directory
+    * 
+    * @param string $filename The name of the file in the directory
+    * @return \sndsgd\fs\File
+    */
+   public function getFile($filename)
+   {
+      if (!is_string($filename)) {
+         throw new InvalidArgumentException(
+            "invalid value provided for 'filename'; ".
+            "expecting a string"
+         );
+      }
+      return new File($this->path.DIRECTORY_SEPARATOR.$filename);
    }
 
    /**

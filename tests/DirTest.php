@@ -101,6 +101,27 @@ class DirTest extends TestCase
    }
 
    /**
+    * @covers ::getFile
+    */
+   public function testGetFile()
+   {
+      $dir = new Dir("/test/dir");
+      $file = $dir->getFile("file.txt");
+      $this->assertInstanceOf("sndsgd\\fs\\File", $file);
+      $this->assertEquals("/test/dir/file.txt", $file->getPath());
+   }
+
+   /**
+    * @covers ::getFile
+    * @expectedException InvalidArgumentException
+    */
+   public function testGetFileException()
+   {
+      $dir = new Dir("/test/dir");
+      $file = $dir->getFile([]);
+   }
+
+   /**
     * @covers ::isEmpty
     */
    public function testIsEmpty()
