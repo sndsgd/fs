@@ -212,6 +212,20 @@ class File extends EntityAbstract
    }
 
    /**
+    * Delete the file
+    * 
+    * @return boolean
+    */
+   public function remove()
+   {
+      if (@unlink($this->path) === false) {
+         $this->setError("failed to delete '{$this->path}");
+         return false;
+      }
+      return true;
+   }
+
+   /**
     * Get the number of lines in the file
     * 
     * @return integer

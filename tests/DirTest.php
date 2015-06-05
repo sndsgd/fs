@@ -146,15 +146,29 @@ class DirTest extends TestCase
    /**
     * @covers ::getList
     */
-   public function testGetList()
+   public function testGetListAsStrings()
    {
       $dir = new Dir(vfsStream::url("root"));
-      $files = $dir->getList();
+      $files = $dir->getList(true);
       $this->assertTrue(is_array($files));
 
       foreach ($files as $name) {
          $path = "{$dir}/$name";
          $this->assertTrue(file_exists($path));
+      }
+   }
+
+   /**
+    * @covers ::getList
+    */
+   public function testGetListAsEntities()
+   {
+      $dir = new Dir(vfsStream::url("root"));
+      $files = $dir->getList();
+      $this->assertTrue(is_array($files));
+
+      foreach ($files as $entity) {
+         $this->assertTrue(file_exists($entity));
       }
    }
 

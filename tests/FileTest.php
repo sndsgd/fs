@@ -185,6 +185,19 @@ class FileTest extends TestCase
    }
 
    /**
+    * @covers ::remove
+    */
+   public function testRemove()
+   {
+      $file = new File($this->getPath("root/test/file.txt"));
+      $this->assertTrue($file->remove());
+      $this->assertFalse($file->test(File::EXISTS));
+
+      $file = new File($this->getPath("root/dir-no-rw/file.txt"));
+      $this->assertFalse($file->remove());
+   }
+
+   /**
     * @covers ::getExtension
     */
    public function testGetExtension()

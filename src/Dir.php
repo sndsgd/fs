@@ -82,12 +82,26 @@ class Dir extends EntityAbstract
 
    /**
     * get a list of the directory children
-    * 
+    *
+    * @param boolean $asStrings Only return the child entity names
     * @return array<string>|boolean
     */
-   public function getList()
+   public function getList($asStrings = false)
    {
-      return array_diff(scandir($this->path), [".", ".."]);
+      $list = scandir($this->path);
+      if ($asStrings === true) {
+         return array_diff($list, [".", ".."]);
+      }
+      
+      $ret = [];
+      foreach ($list as $name) {
+         if ($name === "." || $name === "..") {
+            continue;
+         }
+         $path = $this->path.DIRECTORY_SEPARATOR.$name;
+         $ret[] = (is_dir($path)) ? new Dir($path) : new File($path);
+      }
+      return $ret;
    }
 
    /**
@@ -102,17 +116,9 @@ class Dir extends EntityAbstract
          return false;
       }
 
-      foreach ($this->getList() as $name) {
-         $path = "{$this->path}/$name";
-         if (is_dir($path)) {
-            $dir = new self($path);
-            if ($dir->remove() === false) {
-               $this->error = $dir->getError();
-               return false;
-            }
-         }
-         else if (@unlink($path) === false) {
-            $this->setError("failed to remove file '$path'");
+      foreach ($this->getList() as $entity) {
+         if ($entity->remove() === false) {
+            $this->error = $entity->getError();
             return false;
          }
       }
