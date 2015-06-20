@@ -74,16 +74,16 @@ class FileTest extends TestCase
     */
    public function testTest()
    {
-      $file = new File($this->getPath("root/does/not/exist.txt"));
+      $file = new File(vfsStream::url("root/does/not/exist.txt"));
       $this->assertFalse($file->test(File::EXISTS));
 
-      $file = new File($this->getPath("root/test/file.txt"));
+      $file = new File(vfsStream::url("root/file.rw-"));
       $this->assertTrue($file->test(File::READABLE));
 
-      $file = new File($this->getPath("root/test/emptydir/file.txt"));
+      $file = new File(vfsStream::url("root/dir.rwx"));
       $this->assertFalse($file->test(File::READABLE));
 
-      $file = new File($this->getPath("root/file-no-rw"));
+      $file = new File(vfsStream::url("root/file.---"));
       $this->assertFalse($file->test(File::READABLE));
       $this->assertFalse($file->test(File::WRITABLE));
       $this->assertFalse($file->test(File::EXECUTABLE));
@@ -94,15 +94,15 @@ class FileTest extends TestCase
     */
    public function testPrepareWrite()
    {
-      $file = new File($this->getPath("root/test/file.txt"));
+      $file = new File(vfsStream::url("root/file.rw-"));
       $this->assertTrue($file->prepareWrite());
       $this->assertNull($file->getError());
 
-      $file = new File($this->getPath("root/test/prepare-write/file.txt"));
+      $file = new File(vfsStream::url("root/dir.rwx/file.txt"));
       $this->assertTrue($file->prepareWrite());
       $this->assertNull($file->getError());
 
-      $file = new File($this->getPath("root/dir-no-rw/file.txt"));
+      $file = new File(vfsStream::url("root/dir.--x/file.txt"));
       $this->assertFalse($file->prepareWrite());
       $this->assertTrue(is_string($file->getError()));
    }
@@ -125,7 +125,7 @@ class FileTest extends TestCase
     */
    public function testGetSizeFailure()
    {
-      $path = $this->getPath("root/dir-no-rw/file.txt");
+      $path = vfsStream::url("root/dir.--x/file.txt");
       $file = new File($path);
       $this->assertFalse($file->getSize());
    }
@@ -135,7 +135,7 @@ class FileTest extends TestCase
     */
    public function testGetSizeFailureDoesntExist()
    {
-      $path = $this->getPath("root/does/not/exist.txt");
+      $path = vfsStream::url("root/does/not/exist.txt");
       $file = new File($path);
       $file->getSize();
    }
@@ -146,7 +146,7 @@ class FileTest extends TestCase
    public function testGetSizeException()
    {
       $mock = $this->getMockBuilder("sndsgd\\fs\\File")
-         ->setConstructorArgs([ $this->getPath("root/dir-no-rw/file.txt") ])
+         ->setConstructorArgs([ vfsStream::url("root/dir-no-rw/file.txt") ])
          ->setMethods(["test"])
          ->getMock();
 
@@ -159,7 +159,7 @@ class FileTest extends TestCase
     */
    public function testGetSize()
    {
-      $path = $this->getPath("root/test.txt");
+      $path = vfsStream::url("root/test.txt");
       $file = new File($path);
       $file->write(Str::random(rand(100, 1000)));
       $this->assertEquals(filesize($path), $file->getSize());
@@ -171,16 +171,16 @@ class FileTest extends TestCase
     */
    public function testCanWrite()
    {
-      $file = new File($this->getPath("root/test/file.txt"));
+      $file = new File(vfsStream::url("root/file.-w-"));
       $this->assertTrue($file->canWrite());
 
-      $file = new File($this->getPath("root/test/emptydir/file.txt"));
+      $file = new File(vfsStream::url("root/dir.rwx/file.txt"));
       $this->assertTrue($file->canWrite());
 
-      $file = new File($this->getPath("root/does-not-exist/file.txt"));
+      $file = new File(vfsStream::url("root/newdir/file.txt"));
       $this->assertTrue($file->canWrite());
 
-      $file = new File($this->getPath("root/dir-no-rw/file.txt"));
+      $file = new File(vfsStream::url("root/dir.--x/file.txt"));
       $this->assertFalse($file->canWrite());
    }
 
@@ -189,11 +189,11 @@ class FileTest extends TestCase
     */
    public function testRemove()
    {
-      $file = new File($this->getPath("root/test/file.txt"));
+      $file = new File(vfsStream::url("root/file.rwx"));
       $this->assertTrue($file->remove());
       $this->assertFalse($file->test(File::EXISTS));
 
-      $file = new File($this->getPath("root/dir-no-rw/file.txt"));
+      $file = new File(vfsStream::url("root/dir.--x/file.txt"));
       $this->assertFalse($file->remove());
    }
 
@@ -272,10 +272,11 @@ class FileTest extends TestCase
 
    /**
     * @covers ::write
+    * @covers ::writeFile
     */
    public function testWrite()
    {
-      $path = $this->getPath("root/some/new/path/file.txt");
+      $path = vfsStream::url("root/some/new/path/file.txt");
       $contents = Str::random(rand(100, 1000));
       $this->assertFalse(file_exists($path));
       $file = new File($path);
@@ -293,7 +294,7 @@ class FileTest extends TestCase
     */
    public function testWritePrepareFailure()
    {
-      $path = $this->getPath("root/dir-no-rw/file.txt");
+      $path = vfsStream::url("root/dir.--x/file.txt");
       $contents = Str::random(rand(100, 1000));
       $file = new File($path);
       $this->assertFalse($file->write($contents));
@@ -302,50 +303,123 @@ class FileTest extends TestCase
 
    /**
     * @covers ::write
+    * @covers ::writeFile
     */
    public function testWriteFailure()
    {
-      $this->setQuota(10);
-      $path = $this->getPath("root/test.txt");
+      vfsStream::setQuota(10);
+      $path = vfsStream::url("root/test.txt");
       $contents = Str::random(rand(100, 1000));
       $file = new File($path);
       $this->assertFalse($file->write($contents));
       $this->assertTrue(is_string($file->getError()));
    }
 
+   private function preparePrependTest($len)
+   {
+      $path = vfsStream::url("root/ile.txt");
+      $contents = Str::random($len);
+      file_put_contents($path, $contents);
+      $str = Str::random(100);
+      $expect = $str.$contents;
+      return [$path, $contents, $str, $expect];
+   }
+
+   /**
+    * @covers ::prepend
+    */
+   public function testPrepend()
+   {
+      list($path, $contents, $str, $expect) = $this->preparePrependTest(1024);
+      $file = new File($path);
+      $this->assertTrue($file->prepend($str));
+      $this->assertEquals($expect, file_get_contents($path));
+   }
+
+   /**
+    * @covers ::prepend
+    */
+   public function testPrependCannotWrite()
+   {
+      $file = new File(vfsStream::url("root/file.---"));
+      $this->assertFalse($file->prepend("42"));
+      $this->assertTrue(is_string($file->getError()));
+   }
+
+   /**
+    * @covers ::prepend
+    * @covers ::prependFileInPlace
+    */
+   public function testPrependInPlace()
+   {
+      list($path, $contents, $str, $expect) = $this->preparePrependTest(1024);
+      $file = new File($path);
+      $this->assertTrue($file->prepend($str, 512));
+      $this->assertEquals($expect, file_get_contents($path));
+   }
+
+   /**
+    * @covers ::prepend
+    */
+   public function testPrependReadFailure()
+   {
+      $mock = $this->getMockBuilder("sndsgd\\fs\\File")
+         ->setConstructorArgs([ vfsStream::url("root/file.-w-") ])
+         ->setMethods(["test"])
+         ->getMock();
+      $mock->method("test")->willReturn(true);
+      $this->assertFalse($mock->prepend("42"));
+   }
+
+   /**
+    * @covers ::prepend
+    */
+   public function testPrependWriteFailure()
+   {
+      $mock = $this->getMockBuilder("sndsgd\\fs\\File")
+         ->setConstructorArgs([ vfsStream::url("root/file.r--") ])
+         ->setMethods(["test"])
+         ->getMock();
+      $mock->method("test")->willReturn(true);
+      $this->assertFalse($mock->prepend("42"));
+   }
+   
    /**
     * @covers ::read
+    * @covers ::readFile
     */
    public function testReadFailure()
    {
-      $file = new File($this->getPath("root/dir-no-rw/file.txt"));
+      $file = new File(vfsStream::url("root/dir.--x/file.txt"));
       $this->assertFalse($file->read());
       $this->assertTrue(is_string($file->getError()));
    }
 
    /**
     * @covers ::read
+    * @covers ::readFile
     */
    public function testRead()
    {
       # success
-      $file = new File($this->getPath("root/test/file.txt"));
+      $file = new File(vfsStream::url("root/file.rwx"));
       $this->assertSame("contents...", $file->read());
 
       $this->assertSame("contents...", file_get_contents($file));
 
       # permissions
-      $file = new File($this->getPath("root/noreadwrite"));
+      $file = new File(vfsStream::url("root/file.---"));
       $this->assertFalse($file->read());
    }
 
    /**
     * @covers ::read
+    * @covers ::readFile
     */
    public function testReadFileGetContentsFailure()
    {
       $mock = $this->getMockBuilder("sndsgd\\fs\\File")
-         ->setConstructorArgs([ $this->getPath("root/dir-no-rw/file.txt") ])
+         ->setConstructorArgs([ vfsStream::url("root/dir.--x") ])
          ->setMethods(["test"])
          ->getMock();
 
@@ -362,5 +436,7 @@ class FileTest extends TestCase
       $file = new File($path);
       $this->assertEquals($lines, $file->getLineCount());
    }
+
+   
 }
 

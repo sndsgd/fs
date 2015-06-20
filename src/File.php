@@ -181,9 +181,77 @@ class File extends EntityAbstract
          $this->error = "failed to write '{$this->path}; {$this->error}";
          return false;
       }
-      else if (@file_put_contents($this->path, $contents, $opts) === false) {
+      return $this->writeFile($contents, $opts);
+   }
+
+   /**
+    * @param string $contents
+    * @param integer $opts 
+    * @return boolean
+    */
+   private function writeFile($contents, $opts)
+   {
+      if (@file_put_contents($this->path, $contents, $opts) === false) {
          $this->setError("file to write '{$this->path}'");
          return false;
+      }
+      return true;
+   }
+
+   /**
+    * Prepend contents to a file
+    * 
+    * @param string $content The content to prepend to the file
+    * @param integer $maxMemory The max number of bytes to consume
+    * @return boolean
+    */
+   public function prepend($contents, $maxMemory = 8096)
+   {
+      $test = self::EXISTS | self::READABLE | self::WRITABLE;
+      if ($this->test($test) === false) {
+         $this->error = "failed to prepend file; {$this->error}";
+         return false;
+      }
+
+      $len = strlen($contents);
+      $size = filesize($this->path);
+      $endsize = $len + $size;
+
+      # if the overall filesize is greater than `maxMemory`, write efficiently
+      if ($endsize > $maxMemory) {
+         return $this->prependFileInPlace($contents, $len, $size, $endsize);
+      }
+
+      # use file_get/put_contents to handle the operation
+      else if (($tmp = $this->readFile(-1)) === false) {
+         return false;
+      }
+      else if ($this->writeFile($contents.$tmp, 0) === false) {
+         return false;
+      }
+      return true;
+   }
+
+   /**
+    * @param string $contents
+    * @param integer $len
+    * @param integer $size
+    * @param integer $endsize
+    * @return boolean
+    */
+   private function prependFileInPlace($contents, $len, $size, $endsize)
+   {
+      $fh = fopen($this->path, "r+");
+      $oldcontent = fread($fh, $len);
+      rewind($fh);
+
+      $i = 1;
+      while (ftell($fh) < $endsize) {
+         fwrite($fh, $contents);
+         $contents = $oldcontent;
+         $oldcontent = fread($fh, $len);
+         fseek($fh, $i * $len);
+         $i++;
       }
       return true;
    }
@@ -202,7 +270,15 @@ class File extends EntityAbstract
          $this->error = "failed to read file; {$this->error}";
          return false;
       }
+      return $this->readFile($offset);
+   }
 
+   /**
+    * @param integer $offset
+    * @return string|false
+    */
+   private function readFile($offset)
+   {
       $ret = @file_get_contents($this->path, false, null, $offset);
       if ($ret === false) {
          $this->setError("read operation failed on '{$this->path}'");
