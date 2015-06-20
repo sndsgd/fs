@@ -201,7 +201,7 @@ class File extends EntityAbstract
    /**
     * Prepend contents to a file
     * 
-    * @param string $content The content to prepend to the file
+    * @param string $contents The content to prepend to the file
     * @param integer $maxMemory The max number of bytes to consume
     * @return boolean
     */
