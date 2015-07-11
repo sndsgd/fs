@@ -383,7 +383,19 @@ class FileTest extends TestCase
       $mock->method("test")->willReturn(true);
       $this->assertFalse($mock->prepend("42"));
    }
-   
+
+   /**
+    * @covers ::append
+    */
+   public function testAppend()
+   {
+      $path = vfsStream::url("root/file.rw-");
+      $file = new File($path);
+      $file->write("123");
+      $file->append("456789");
+      $this->assertEquals("123456789", file_get_contents($path));
+   }
+
    /**
     * @covers ::read
     * @covers ::readFile

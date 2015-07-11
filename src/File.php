@@ -257,6 +257,17 @@ class File extends EntityAbstract
    }
 
    /**
+    * Convenience method for appending to a file
+    * 
+    * @param string $contents The contents to append
+    * @return boolean
+    */
+   public function append($contents)
+   {
+      return $this->write($contents, FILE_APPEND);
+   }
+
+   /**
     * Read the contents of the file
     *
     * @param integer $offset The position to start reading from
