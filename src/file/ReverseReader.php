@@ -39,7 +39,7 @@ class ReverseReader implements \Iterator
    /**
     * The portion of the file that is read into memory
     *
-    * @var string
+    * @var array<string>
     */
    protected $buffer = null;
 
