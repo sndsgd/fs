@@ -3,10 +3,13 @@
 namespace sndsgd\fs;
 
 use \InvalidArgumentException;
+use \sndsgd\ErrorTrait;
 
 
 abstract class EntityAbstract
 {
+   use ErrorTrait;
+
    // bitmask values for use in sndsgd\fs\Entity::test()
    const EXISTS = 1;
    const DIR = 2;
@@ -51,13 +54,6 @@ abstract class EntityAbstract
    protected $path;
 
    /**
-    * An error message
-    * 
-    * @var string|null
-    */
-   protected $error = null;
-
-   /**
     * Constructor
     * 
     * @param string $path
@@ -86,32 +82,6 @@ abstract class EntityAbstract
    {
       return $this->path;
    }
-
-   /**
-    * Set an error message
-    *
-    * @param string $msg
-    */
-   public function setError($msg)
-   {
-      if (($err = error_get_last()) !== null) {
-         $msg .= "; '{$err['message']}' in {$err['file']} on {$err['line']}";
-      }
-      $this->error = $msg;
-   }
-
-   /**
-    * Retreive and clear the last error
-    * 
-    * @return string
-    */
-   public function getError()
-   {
-      $message = $this->error;
-      $this->error = null;
-      return $message;
-   }
-
 
    /**
     * Perform type/permissions tests on an entity

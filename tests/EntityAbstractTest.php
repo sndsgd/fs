@@ -71,15 +71,18 @@ class EntityAbstractTest extends TestCase
    public function testSetError()
    {
       $message = "whoop! error!";
-      $this->mock->setError($message);
+
+
+      $method = $this->rc->getMethod("setError");
+      $method->setAccessible(true);
+
+      $method->invokeArgs($this->mock, [$message]);
       $this->assertEquals($message, $this->mock->getError());
-
-
 
       # force an error to be created
       @file_put_contents(vfsStream::url("root/dir-no-rw/nope.txt"), "test");
       $message = "file write failure";
-      $this->mock->setError($message);
+      $method->invokeArgs($this->mock, [$message]);
       $begin = "$message; file_put_contents";
       $this->assertEquals(0, strpos($this->mock->getError(), $begin));
    }
@@ -96,7 +99,6 @@ class EntityAbstractTest extends TestCase
       $property->setAccessible(true);
       $property->setValue($this->mock, $err);
       $this->assertSame($err, $this->mock->getError());
-      $this->assertNull($this->mock->getError());
    }
 
    public function testGetPath()
