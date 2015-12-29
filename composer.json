@@ -16,7 +16,7 @@
    },
    "require": {
       "php": ">=5.4.0",
-      "sndsgd/util": "0.6.4"
+      "sndsgd/util": "~0.7.0"
    },
    "require-dev": {
       "phpunit/phpunit": "~4.0",
