@@ -12,55 +12,7 @@ use \sndsgd\Str;
 class FileTest extends TestCase
 {
     /**
-     * @covers ::get
-     * @covers \sndsgd\fs\EntityAbstract::get
-     */
-    public function testGet()
-    {
-        $file = File::get("./some/file.txt");
-        $expect = getcwd()."/some/file.txt";
-        $this->assertEquals($expect, $file->getPath());
-    }
-
-    /**
-     * @covers ::formatSize
-     * @expectedException InvalidArgumentException
-     */
-    public function testFormatSizeInvalidBytes()
-    {
-        File::formatSize("string");
-    }
-
-    /**
-     * @covers ::formatSize
-     * @expectedException InvalidArgumentException
-     */
-    public function testFormatSizeInvalidPrecision()
-    {
-        File::formatSize(1234, "string");
-    }
-
-    /**
-     * @covers ::formatSize
-     * @dataProvider providerFormatSize
-     */
-    public function testFormatSize($size, $precision, $expect)
-    {
-        $this->assertSame($expect, File::formatSize($size, $precision));
-    }
-
-    public function providerFormatSize()
-    {
-        return [
-            [599785472, 1, "572.0 MB"],
-            [1234567, 0, "1 MB"],
-            [1234567, 2, "1.18 MB"],
-            [1234567890, 4, "1.1498 GB"],
-        ];
-    }
-
-    /**
-     * @covers nothing
+     * @coversNothing
      */
     private function createTestFile()
     {
@@ -102,20 +54,21 @@ class FileTest extends TestCase
 
     /**
      * @covers ::prepareWrite
+     * @dataProvider providerPrepareWrite
      */
-    public function testPrepareWrite()
+    public function testPrepareWrite($path, $expect)
     {
-        $file = new File(vfsStream::url("root/file.rw-"));
-        $this->assertTrue($file->prepareWrite());
-        $this->assertNull($file->getError());
+        $file = new File(vfsStream::url($path));
+        $this->assertSame($expect, $file->prepareWrite());
+    }
 
-        $file = new File(vfsStream::url("root/dir.rwx/file.txt"));
-        $this->assertTrue($file->prepareWrite());
-        $this->assertNull($file->getError());
-
-        $file = new File(vfsStream::url("root/dir.--x/file.txt"));
-        $this->assertFalse($file->prepareWrite());
-        $this->assertTrue(is_string($file->getError()));
+    public function providerPrepareWrite()
+    {
+        return [
+            ["root/file.rw-", true],
+            ["root/dir.rwx/file.txt", true],
+            ["root/dir.--x/file.txt", false],
+        ];
     }
 
     /**
@@ -131,154 +84,182 @@ class FileTest extends TestCase
     }
 
     /**
-     * @covers ::getSize
-     * @expectedException
+     * @covers ::getByteSize
+     * @dataProvider providerGetByteSize
      */
-    public function testGetSizeFailure()
+    public function testGetByteSize($path, $size, $testResult, $expect)
     {
-        $path = vfsStream::url("root/dir.--x/file.txt");
-        $file = new File($path);
-        $this->assertFalse($file->getSize());
-    }
-
-    /**
-     * @covers ::getSize
-     */
-    public function testGetSizeFailureDoesntExist()
-    {
-        $path = vfsStream::url("root/does/not/exist.txt");
-        $file = new File($path);
-        $file->getSize();
-    }
-
-    /**
-     * @covers ::getSize
-     */
-    public function testGetSizeException()
-    {
+        $path = vfsStream::url($path);
         $mock = $this->getMockBuilder("sndsgd\\fs\\File")
-            ->setConstructorArgs([ vfsStream::url("root/dir-no-rw/file.txt") ])
+            ->setConstructorArgs([$path])
             ->setMethods(["test"])
             ->getMock();
 
-        $mock->method("test")->willReturn(true);
-        $this->assertFalse($mock->getSize());
+        $mock->method("test")->willReturn($testResult);
+
+        # vfsstream under php7 seems is a little weird
+        # is_writable wasn't working properly here
+        if ($size > 0) {
+            file_put_contents($path, Str::random($size));
+        }
+        $this->assertSame($expect, $mock->getByteSize());
+    }
+
+    public function providerGetByteSize()
+    {
+        return [
+            ["root/file.txt", 123, true, 123],
+            ["root/file.---", 0, false, -1],
+
+            # force filesize read failure
+            ["root/does/not/exist.txt", 0, true, -1],
+        ];
     }
 
     /**
      * @covers ::getSize
+     * @dataProvider providerGetSize
      */
-    public function testGetSize()
+    public function testGetSize($byteSize, $precision, $decimal, $sep, $expect)
     {
-        $path = vfsStream::url("root/test.txt");
-        $file = new File($path);
-        $file->write(Str::random(rand(100, 1000)));
-        $this->assertEquals(filesize($path), $file->getSize());
-        $this->assertTrue(is_string($file->getSize(2)));
+        $mock = $this->getMockBuilder("sndsgd\\fs\\File")
+            ->disableOriginalConstructor()
+            ->setMethods(["getByteSize"])
+            ->getMock();
+
+        $mock->method("getByteSize")->willReturn($byteSize);
+
+        $this->assertSame($expect, $mock->getSize($precision, $decimal, $sep));
     }
+
+    public function providerGetSize()
+    {
+        $ret = [];
+
+        # bytesize read failure results in an empty string
+        $ret[] = [-1, 1, ".", ",", ""];
+
+        $vals = [1023, 3, ".", ","];
+        $expect = call_user_func_array("sndsgd\\Fs::formatSize", $vals);
+        $ret[] = array_merge($vals, [$expect]);
+
+        $vals = [intval(512.789 * pow(1024, 3)), 1, ".", ","];
+        $expect = call_user_func_array("sndsgd\\Fs::formatSize", $vals);
+        $ret[] = array_merge($vals, [$expect]);
+
+        return $ret;
+    }
+
+
 
     /**
      * @covers ::canWrite
+     * @dataProvider providerCanWrite
      */
-    public function testCanWrite()
+    public function testCanWrite($path, $expect)
     {
-        $file = new File(vfsStream::url("root/file.-w-"));
-        $this->assertTrue($file->canWrite());
+        $file = new File(vfsStream::url($path));
+        $this->assertSame($expect, $file->canWrite());
+    }
 
-        $file = new File(vfsStream::url("root/dir.rwx/file.txt"));
-        $this->assertTrue($file->canWrite());
-
-        $file = new File(vfsStream::url("root/newdir/file.txt"));
-        $this->assertTrue($file->canWrite());
-
-        $file = new File(vfsStream::url("root/dir.--x/file.txt"));
-        $this->assertFalse($file->canWrite());
+    public function providerCanWrite()
+    {
+        return [
+            ["root/file.-w-", true],
+            ["root/dir.rwx/file.txt", true],
+            ["root/newdir/file.txt", true],
+            ["root/dir.--x/file.txt", false],
+        ];
     }
 
     /**
      * @covers ::remove
+     * @dataProvider providerRemove
      */
-    public function testRemove()
+    public function testRemove($path, $expect)
     {
-        $file = new File(vfsStream::url("root/file.rwx"));
-        $this->assertTrue($file->remove());
-        $this->assertFalse($file->test(File::EXISTS));
+        $file = new File(vfsStream::url($path));
+        $this->assertSame($expect, $file->remove());
+        if ($expect === true) {
+            $this->assertFalse(file_exists($file));
+        }
+    }
 
-        $file = new File(vfsStream::url("root/dir.--x/file.txt"));
-        $this->assertFalse($file->remove());
+    public function providerRemove()
+    {
+        return [
+            ["root/file.rwx", true],
+            ["root/dir.--x/file.txt", false],
+        ];
     }
 
     /**
      * @covers ::getExtension
+     * @dataProvider providerGetExtension
      */
-    public function testGetExtension()
+    public function testGetExtension($name, $defaultExt, $expect)
     {
-        $file = new File("file.txt");
-        $this->assertEquals("txt", $file->getExtension());
+        $file = new File($name);
+        if ($defaultExt === null) {
+            $result = $file->getExtension();
+        }
+        else {
+            $result = $file->getExtension($defaultExt);
+        }
+        $this->assertEquals($expect, $result);
+    }
 
-        $file = new File("/some/path/file.txt");
-        $this->assertEquals("txt", $file->getExtension());
-
-        $file = new File("file");
-        $this->assertNull($file->getExtension());
-        $this->assertSame("", $file->getExtension(""));
-
-        $file = new File(".hidden");
-        $this->assertNull($file->getExtension());
-
-        $file = new File(".hidden.ext");
-        $this->assertEquals("ext", $file->getExtension());
+    public function providerGetExtension()
+    {
+        return [
+            ["file.txt", null, "txt"],
+            ["file.txt", "ext", "txt"],
+            ["/some/path/file.txt", null, "txt"],
+            ["/some/path/file.txt", "ext", "txt"],
+            [".hidden", null, ""],
+            [".hidden", "ext", "ext"],
+            [".hidden.txt", null, "txt"],
+            [".hidden.txt", "ext", "txt"],
+        ];
     }
 
     /**
      * @covers ::splitName
+     * @dataProvider providerSplitName
      */
-    public function testSplitNameFile()
+    public function testSplitName($name, $defaultExt, $expectName, $expectExt)
     {
-        $file = new File("file.txt");
-        list($name, $ext) = $file->splitName();
-        $this->assertEquals("file", $name);
-        $this->assertEquals("txt", $ext);
-        $file = new File("/file.txt");
-        list($name, $ext) = $file->splitName();
-        $this->assertEquals("file", $name);
-        $this->assertEquals("txt", $ext);
+        $file = new File($name);
+        if ($defaultExt === null) {
+            $result = $file->splitName();
+        }
+        else {
+            $result = $file->splitName($defaultExt);
+        }
 
-        # without extension
-        $file = new File("file");
-        list($name, $ext) = $file->splitName();
-        $this->assertEquals("file", $name);
-        $this->assertNull($ext);
-        $file = new File("/file");
-        list($name, $ext) = $file->splitName();
-        $this->assertEquals("file", $name);
-        $this->assertNull($ext);
+        $this->assertArrayHasKey(0, $result);
+        $this->assertArrayHasKey(1, $result);
+        $this->assertEquals($expectName, $result[0]);
+        $this->assertEquals($expectExt, $result[1]);
+    }
 
-        # hidden file with extension
-        $file = new File(".hidden.txt");
-        list($name, $ext) = $file->splitName();
-        $this->assertEquals(".hidden", $name);
-        $this->assertEquals("txt", $ext);
-        $file = new File("/.hidden.txt");
-        list($name, $ext) = $file->splitName();
-        $this->assertEquals(".hidden", $name);
-        $this->assertEquals("txt", $ext);
+    public function providerSplitName()
+    {
+        return [
+            ["file", null, "file", ""],
+            ["file", "ext", "file", "ext"],
+            ["/some/path/file", null, "file", ""],
+            ["/some/path/file", "ext", "file", "ext"],
+            ["file.txt", null, "file", "txt"],
+            ["file.txt", "ext", "file", "txt"],
+            ["/some/path/file.txt", null, "file", "txt"],
+            ["/some/path/file.txt", "ext", "file", "txt"],
 
-        # hidden file no extension
-        $file = new File(".hidden");
-        list($name, $ext) = $file->splitName();
-        $this->assertEquals(".hidden", $name);
-        $this->assertNull($ext);
-        $file = new File("/.hidden");
-        list($name, $ext) = $file->splitName();
-        $this->assertEquals(".hidden", $name);
-        $this->assertNull($ext);
-
-        # provide an empty string as the default value for a missing extension
-        $file = new File("filename");
-        list($name, $ext) = $file->splitName("");
-        $this->assertEquals("filename", $name);
-        $this->assertSame("", $ext);
+            ["/dir/.hidden", null, ".hidden", ""],
+            ["/dir/.hidden", "ext", ".hidden", "ext"],
+            ["/dir/.hidden.txt", null, ".hidden", "txt"],
+            ["/dir/.hidden.txt", "ext", ".hidden", "txt"],
+        ];
     }
 
     /**
@@ -318,12 +299,13 @@ class FileTest extends TestCase
      */
     public function testWriteFailure()
     {
-        vfsStream::setQuota(10);
-        $path = vfsStream::url("root/test.txt");
-        $contents = Str::random(rand(100, 1000));
-        $file = new File($path);
-        $this->assertFalse($file->write($contents));
-        $this->assertTrue(is_string($file->getError()));
+        $mock = $this->getMockBuilder("sndsgd\\fs\\File")
+            ->setConstructorArgs([vfsStream::url("root/dir.--x/file.txt")])
+            ->setMethods(["prepareWrite"])
+            ->getMock();
+
+        $mock->method("prepareWrite")->willReturn(true);
+        $this->assertFalse($mock->write("testing"));
     }
 
     private function preparePrependTest($len)

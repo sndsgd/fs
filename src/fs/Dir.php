@@ -11,7 +11,7 @@ class Dir extends EntityAbstract
     /**
      * {@inheritdoc}
      */
-    public function test($opts)
+    public function test(int $opts): bool
     {
         return parent::test($opts | self::DIR);
     }
@@ -48,7 +48,7 @@ class Dir extends EntityAbstract
 
     /**
      * Get an instance of \sndsgd\fs\File for a file in this directory
-     * 
+     *
      * @param string $filename The name of the file in the directory
      * @return \sndsgd\fs\File
      */
@@ -65,8 +65,8 @@ class Dir extends EntityAbstract
 
     /**
      * Determine if a directory is empty
-     * 
-     * @return boolean 
+     *
+     * @return boolean
      * @throws Exception If the directory does not exist or is not readable
      */
     public function isEmpty()
@@ -106,11 +106,11 @@ class Dir extends EntityAbstract
 
     /**
      * Recursively remove the directory
-     * 
+     *
      * @return boolean
      */
     public function remove()
-    { 
+    {
         if ($this->test(self::EXISTS | self::READABLE | self::WRITABLE) === false) {
             $this->error = "failed to remove directory; {$this->error}";
             return false;

@@ -4,10 +4,6 @@ namespace sndsgd\fs;
 
 use \org\bovigo\vfs\vfsStream;
 
-
-require __DIR__."/../vendor/autoload.php";
-
-
 class TestCase extends \PHPUnit_Framework_TestCase
 {
     protected $root;
@@ -20,17 +16,20 @@ class TestCase extends \PHPUnit_Framework_TestCase
             "emptydir" => [],
             "test" => [
                 "file.txt" => "contents...",
-                "emptydir" => []
+                "emptydir" => [],
             ],
             "dir.rwx" => [],
             "dir.r-x" => [],
             "dir.--x" => [],
+            "dir.---" => [
+                "file.txt" => "contents...",
+            ],
             "file.rwx" => "contents...",
             "file.rw-" => "contents...",
             "file.r--" => "contents...",
             "file.-w-" => "contents...",
             "file.--x" => "contents...",
-            "file.---" => "contents..."
+            "file.---" => "contents...",
         ]);
 
         $this->root->getChild("dir.rwx")->chmod(0777);
@@ -39,6 +38,12 @@ class TestCase extends \PHPUnit_Framework_TestCase
             ->chmod(0711)
             ->chgrp(vfsStream::GROUP_ROOT)
             ->chown(vfsStream::OWNER_ROOT);
+        $this->root->getChild("dir.---")
+            ->chmod(0000)
+            ->chgrp(vfsStream::GROUP_ROOT)
+            ->chown(vfsStream::OWNER_ROOT);
+
+
 
         $this->root->getChild("file.rwx")->chmod(0777);
         $this->root->getChild("file.rw-")->chmod(0666);
@@ -46,5 +51,11 @@ class TestCase extends \PHPUnit_Framework_TestCase
         $this->root->getChild("file.-w-")->chmod(0222);
         $this->root->getChild("file.--x")->chmod(0111);
         $this->root->getChild("file.---")->chmod(0000);
+
+        // reset the tracked temp files
+        $rc = new \ReflectionClass("sndsgd\\fs\\Temp");
+        $property = $rc->getProperty("entities");
+        $property->setAccessible(true);
+        $property->setValue([]);
     }
 }

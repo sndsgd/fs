@@ -2,18 +2,32 @@
 
 namespace sndsgd\fs\file;
 
-
+/**
+ * A file reader that allows for iterating over its contents 
+ * line by line in reverse
+ */
 class ReverseReader implements \Iterator
 {
-    const BUFFER_SIZE = 8192;
-    const NEWLINE = PHP_EOL;
-
     /**
      * The absolute path to the file
      * 
      * @var string
      */
     protected $path;
+
+    /**
+     * The newline character or characters
+     *
+     * @var string
+     */
+    protected $newline;
+
+    /**
+     * The number of bytes to read when calling `fread()`
+     *
+     * @var int
+     */
+    protected $bytesPerRead;
 
     /**
      * A pointer to the file once it is opened
@@ -59,17 +73,25 @@ class ReverseReader implements \Iterator
 
     /**
      * @param string $path The absolute path to the file to read
+     * @param string $newliubne [<description>]
      */
-    public function __construct($path)
+    public function __construct(
+        string $path,
+        string $newline = PHP_EOL,
+        int $bytesPerRead = 8192
+    )
     {
         $this->path = $path;
+        $this->newline = $newline;
+        $this->bytesPerRead = $bytesPerRead;
+
         $this->fp = fopen($path, "r");
         $this->filesize = filesize($path);
     }
 
     /**
      * @see http://php.net/manual/en/class.iterator.php
-     * @return ?string
+     * @return string|null
      */
     public function current()
     {
@@ -78,16 +100,16 @@ class ReverseReader implements \Iterator
 
     /**
      * @see http://php.net/manual/en/class.iterator.php
-     * @return integer
+     * @return int
      */
-    public function key()
+    public function key(): int
     {
         return $this->lineNumber;
     }
 
     /**
      * @see http://php.net/manual/en/class.iterator.php
-     * @return ?string
+     * @return void
      */
     public function next()
     {
@@ -105,9 +127,10 @@ class ReverseReader implements \Iterator
             $this->pos = $this->filesize;
             $this->value = null;
             $this->lineNumber = -1;
+            $bytesRemaining = $this->filesize % $this->bytesPerRead;
             $this->buffer = explode(
-                self::NEWLINE,
-                $this->read($this->filesize % self::BUFFER_SIZE ?: self::BUFFER_SIZE)
+                $this->newline,
+                $this->read($bytesRemaining ?: $this->bytesPerRead)
             );
             $this->next();
         }
@@ -126,7 +149,7 @@ class ReverseReader implements \Iterator
      * @param integer $size The number of bytes to read
      * @return string
      */
-    private function read($size)
+    private function read(int $size): string
     {
         $this->pos -= $size;
         fseek($this->fp, $this->pos);
@@ -134,14 +157,14 @@ class ReverseReader implements \Iterator
     }
 
     /**
-     * @return string
+     * @return string|null
      */
     private function readline()
     {
         while ($this->pos !== 0 && count($this->buffer) < 2) {
             $this->buffer = explode(
-                self::NEWLINE,
-                $this->read(self::BUFFER_SIZE).$this->buffer[0]
+                $this->newline,
+                $this->read($this->bytesPerRead).$this->buffer[0]
             );
         }
         return array_pop($this->buffer);

@@ -2,49 +2,20 @@
 
 namespace sndsgd\fs;
 
-use \InvalidArgumentException;
-use \sndsgd\ErrorTrait;
-
-
+/**
+ * Base class for filesystem entities
+ */
 abstract class EntityAbstract
 {
-    use ErrorTrait;
+    use \sndsgd\ErrorTrait;
 
-    // bitmask values for use in sndsgd\fs\Entity::test()
+    # bitmask values for use in sndsgd\fs\Entity::test()
     const EXISTS = 1;
     const DIR = 2;
     const FILE = 4;
     const READABLE = 8;
     const WRITABLE = 16;
     const EXECUTABLE = 32;
-
-    /**
-     * Remove wonky characters from a path name
-     *
-     * @param string $name The basename to sanitize
-     * @return string
-     */
-    public static function sanitizeName($name)
-    {
-        $basename = basename($name);
-        $dir = ($basename === $name) ? null : dirname($name);
-        $basename = preg_replace("~[^A-Za-z0-9-_.]~", "_", $basename);
-        return ($dir === null)
-            ? $basename
-            : $dir.DIRECTORY_SEPARATOR.$basename;
-    }
-
-    /**
-     * Get an entity instance and normalize the path
-     * @param string $path
-     * @return \sndsgd\fs\Dir|\sndsgd\fs\File
-     */
-    public static function get($path)
-    {
-        $instance = new static($path);
-        $instance->normalize();
-        return $instance;
-    }
 
     /**
      * The path as provided to the constructor
@@ -58,7 +29,7 @@ abstract class EntityAbstract
      * 
      * @param string $path
      */
-    public function __construct($path)
+    public function __construct(string $path)
     {
         $this->path = $path;
     }
@@ -68,7 +39,7 @@ abstract class EntityAbstract
      * 
      * @return string
      */
-    public function __toString()
+    public function __toString(): string
     {
         return $this->path;
     }
@@ -78,7 +49,7 @@ abstract class EntityAbstract
      * 
      * @return string
      */
-    public function getPath()
+    public function getPath(): string
     {
         return $this->path;
     }
@@ -86,18 +57,11 @@ abstract class EntityAbstract
     /**
      * Perform type/permissions tests on an entity
      *
-     * @param integer $opts
+     * @param int $opts
      * @return boolean
      */
-    public function test($opts)
+    public function test(int $opts): bool
     {
-        if (!is_int($opts)) {
-            throw new InvalidArgumentException(
-                "invalid value provided for 'opts'; ".
-                "expecting options as an integer"
-            );
-        }
-
         if ($opts & self::EXISTS && file_exists($this->path) === false) {
             $this->error = "'{$this->path}' does not exist";
             return false;
@@ -122,9 +86,7 @@ abstract class EntityAbstract
             $this->error = "'{$this->path}' is not executable";
             return false;
         }
-        else {
-            return true;
-        }
+        return true;
     }
 
     /**
@@ -165,7 +127,7 @@ abstract class EntityAbstract
      */
     public function isAbsolute()
     {
-        return $this->path{0} === DIRECTORY_SEPARATOR;
+        return $this->path{0} === "/";
     }
 
     /**
@@ -181,7 +143,7 @@ abstract class EntityAbstract
         }
 
         $parts = explode("/", $path);
-        $abs = ($parts[0] === "");
+        $isAbsolute = ($parts[0] === "");
         $temp = [];
         foreach ($parts as $part) {
             if ($part === "." || $part === "") {
@@ -195,23 +157,8 @@ abstract class EntityAbstract
             }
         }
         $temp = implode("/", $temp);
-        $this->path = ($abs) ? "/$temp" : $temp;
-        return $this->path;
-    }
-
-    /**
-     * Normalize the path to a directory
-     *
-     * @param string $dir
-     * @return string
-     */
-    public function normalizeTo($dir)
-    {
-        if ($this->isAbsolute()) {
-            return $this->path;   
-        }
-        $this->path = "$dir/$this->path";
-        return $this->normalize();
+        $this->path = ($isAbsolute) ? "/$temp" : $temp;
+        return $this;
     }
 
     private function normalizeLeadingDots($path)
@@ -229,6 +176,21 @@ abstract class EntityAbstract
             $path = dirname(getcwd()).substr($path, 2);
         }
         return $path;
+    }
+
+    /**
+     * Normalize the path to a directory
+     *
+     * @param string $dir
+     * @return string
+     */
+    public function normalizeTo($dir)
+    {
+        if ($this->isAbsolute()) {
+            return $this->path;   
+        }
+        $this->path = "$dir/$this->path";
+        return $this->normalize();
     }
 
     /**

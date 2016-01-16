@@ -27,20 +27,6 @@ class EntityAbstractTest extends TestCase
         $this->rc = new ReflectionClass(self::CLASSNAME);
     }
 
-    /**
-     * @covers ::sanitizeName
-     */
-    public function testSanitizeName()
-    {
-        $test = __METHOD__.".test";
-        $expect = "sndsgd_fs_EntityAbstractTest__testSanitizeName.test";
-        $this->assertEquals($expect, File::sanitizeName($test));
-
-        $test = "!@#$%^&*(";
-        $expect = "_________";
-        $this->assertEquals($expect, File::sanitizeName($test));
-    }
-
     public function testCoreFuncs()
     {
         $this->assertEquals(basename($this->path), basename($this->mock));
@@ -104,15 +90,6 @@ class EntityAbstractTest extends TestCase
     public function testGetPath()
     {
         $this->assertSame($this->path, $this->mock->getPath());
-    }
-
-    /**
-     * @covers ::test
-     * @expectedException InvalidArgumentException
-     */
-    public function testTestInvalidArg()
-    {
-        $this->mock->test("must-be-int");
     }
 
     /**

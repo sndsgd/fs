@@ -3,5 +3,6 @@
 /.gitignore                         export-ignore
 /.travis.yml                        export-ignore
 /apigen.neon                        export-ignore
+/src/fs/TestCase.php                export-ignore
 /phpunit.xml                        export-ignore
 /tests                              export-ignore

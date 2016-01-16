@@ -1,4 +1,4 @@
-docs
+build
 vendor
 composer.lock
 tests/coverage-clover.xml

@@ -1,4 +1,4 @@
 title: sndsgd/fs
-destination: docs
+destination: build/docs
 source:
    - src

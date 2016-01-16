@@ -2,73 +2,13 @@
 
 namespace sndsgd\fs;
 
-use \Exception;
-use \InvalidArgumentException;
-
 
 class File extends EntityAbstract
 {
     /**
-     * Format a bytesize into a human readable string
-     * 
-     * @param integer $bytes The number fo bytes to format
-     * @param integer $precision The number of decimal places to round to
-     * @param string $point Decimal point
-     * @param string $sep Thousands separator
-     * @return string
-     */
-    public static function formatSize(
-        $bytes, 
-        $precision = 0, 
-        $point = '.', 
-        $sep = ','
-    )
-    {
-        if (!is_int($bytes)) {
-            throw new InvalidArgumentException(
-                "invalid value provided for 'bytes'; ".
-                "expecting a number of bytes as an integer"
-            );
-        }
-        else if (!is_int($precision)) {
-            throw new InvalidArgumentException(
-                "invalid value provided for 'precision'; ".
-                "expecting the number of decimal places as an integer or null"
-            );
-        }
-
-        $i = 0;
-        $sizes = ['bytes','KB','MB','GB','TB','PB','EB'];
-        while ($bytes > 1024) {
-            $bytes /= 1024;
-            $i++;
-        }
-        return number_format($bytes, $precision, $point, $sep).' '.$sizes[$i];
-    }
-
-    /**
-     * Create a temp file
-     *
-     * @param string $prefix A prefix for the 
-     * @param  integer $mode   [description]
-     * @return [type]          [description]
-     */
-    public static function createTemp($prefix)
-    {
-        $path = tempnam(Temp::getDir(), $prefix);
-        if (!$path) {
-            throw new RuntimeException("failed to create temp file");
-        }
-
-        $file = new self($path);
-        Temp::registerEntity($file);
-        return $file;
-    }
-
-    /**
      * {@inheritdoc}
      */
-    public function test($opts)
+    public function test(int $opts): bool
     {
         return parent::test($opts | self::FILE);
     }
@@ -76,7 +16,7 @@ class File extends EntityAbstract
     /**
      * {@inheritdoc}
      */
-    public function canWrite()
+    public function canWrite(): bool
     {
         if (file_exists($this->path)) {
             return $this->test(self::WRITABLE);
@@ -87,7 +27,7 @@ class File extends EntityAbstract
     /**
      * {@inheritdoc}
      */
-    public function prepareWrite($mode = 0775)
+    public function prepareWrite($mode = 0775): bool
     {
         if (file_exists($this->path)) {
             return $this->test(self::WRITABLE);
@@ -108,16 +48,16 @@ class File extends EntityAbstract
      * @aliasof ::getParent
      * @return \sndsgd\fs\Dir
      */
-    public function getDir()
+    public function getDir(): Dir
     {
         return $this->getParent();
     }
 
     /**
      * @param string $default The value to return when no extension exists
-     * @return string|null
+     * @return string
      */
-    public function getExtension($default = null)
+    public function getExtension(string $default = ""): string
     {
         $filename = basename($this->path);
         $extpos = strrpos($filename, ".");
@@ -141,12 +81,12 @@ class File extends EntityAbstract
      * // => 'txt'
      * </code>
      * 
-     * @param string|null $defaultExtension
+     * @param string $defaultExtension
      * @return array
      * - [0] string name
      * - [1] string|null extension
      */
-    public function splitName($defaultExtension = null)
+    public function splitName(string $defaultExtension = ""): array
     {
         $filename = basename($this->path);
         $extpos = strrpos($filename, ".");
@@ -162,39 +102,53 @@ class File extends EntityAbstract
     }
 
     /**
-     * Get the filesize
-     * 
-     * @param integer $precision The number of decimal places to return
-     * @param string $point The decimal point
-     * @param string $sep The thousands separator
-     * @return string|integer|false
-     * @return string|integer The formatted filesize
-     * @return false If the file could not read or the stat failed
+     * Get the byte size of the file
+     *
+     * @return int `-1` if the size could not be determined
      */
-    public function getSize($precision = 0, $point = ".", $sep = ",")
+    public function getByteSize(): int
     {
         if ($this->test(self::READABLE) !== true) {
             $this->error = "failed to stat filesize; {$this->error}";
-            return false;
+            return -1;
         }
-        else if (($bytes = @filesize($this->path)) === false) {
+        $bytes = @filesize($this->path);
+        if ($bytes === false) {
             $this->setError("failed to stat filesize for '{$this->path}'");
-            return false;
+            return -1;
         }
+        return $bytes;
+    }
 
-        return ($precision === 0)
-            ? $bytes
-            : self::formatSize($bytes, $precision, $point, $sep);
+    /**
+     * Get the filesize as a formatted string
+     * 
+     * @param int $precision The number of decimal places to return
+     * @param string $point The decimal point
+     * @param string $sep The thousands separator
+     * @return string An empty string if the size could not be determined
+     */
+    public function getSize(
+        int $precision = 0,
+        string $point = ".",
+        string $sep = ","
+    ): string
+    {
+        $bytes = $this->getByteSize();
+        if ($bytes === -1) {
+            return "";
+        }
+        return \sndsgd\Fs::formatSize($bytes, $precision, $point, $sep); 
     }
 
     /**
      * Prepare and write to the file
      * 
      * @param string $contents
-     * @param integer $opts Bitmask options to pass to `file_put_contents`
-     * @return boolean
+     * @param int $opts Bitmask options to pass to `file_put_contents`
+     * @return bool
      */
-    public function write($contents, $opts = 0)
+    public function write($contents, $opts = 0): bool
     {
         if ($this->prepareWrite() !== true) {
             $this->error = "failed to write '{$this->path}; {$this->error}";
@@ -205,7 +159,7 @@ class File extends EntityAbstract
 
     /**
      * @param string $contents
-     * @param integer $opts 
+     * @param int $opts 
      * @return boolean
      */
     private function writeFile($contents, $opts)
@@ -221,7 +175,7 @@ class File extends EntityAbstract
      * Prepend contents to a file
      * 
      * @param string $contents The content to prepend to the file
-     * @param integer $maxMemory The max number of bytes to consume
+     * @param int $maxMemory The max number of bytes to consume
      * @return boolean
      */
     public function prepend($contents, $maxMemory = 8096)
@@ -253,9 +207,9 @@ class File extends EntityAbstract
 
     /**
      * @param string $contents
-     * @param integer $len
-     * @param integer $size
-     * @param integer $endsize
+     * @param int $len
+     * @param int $size
+     * @param int $endsize
      * @return boolean
      */
     private function prependFileInPlace($contents, $len, $size, $endsize)
@@ -289,12 +243,12 @@ class File extends EntityAbstract
     /**
      * Read the contents of the file
      *
-     * @param integer $offset The position to start reading from
+     * @param int $offset The position to start reading from
      * @return boolean|string
      * @return string The contents of the file on success
      * @return false If the file could not be read
      */
-    public function read($offset = -1)
+    public function read(int $offset = -1)
     {
         if ($this->test(self::EXISTS | self::READABLE) === false) {
             $this->error = "failed to read file; {$this->error}";
@@ -304,10 +258,10 @@ class File extends EntityAbstract
     }
 
     /**
-     * @param integer $offset
+     * @param int $offset
      * @return string|false
      */
-    private function readFile($offset)
+    private function readFile(int $offset)
     {
         $ret = @file_get_contents($this->path, false, null, $offset);
         if ($ret === false) {
@@ -322,7 +276,7 @@ class File extends EntityAbstract
      * 
      * @return boolean
      */
-    public function remove()
+    public function remove(): bool
     {
         if (@unlink($this->path) === false) {
             $this->setError("failed to delete '{$this->path}");
@@ -334,9 +288,9 @@ class File extends EntityAbstract
     /**
      * Get the number of lines in the file
      * 
-     * @return integer
+     * @return int
      */
-    public function getLineCount()
+    public function getLineCount():int
     {
         $ret = 0;
         $fh = fopen($this->path, "r");

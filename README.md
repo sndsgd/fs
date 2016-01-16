@@ -17,11 +17,11 @@ The classes in `sndsgd\fs` attempt to simplify tedious filesystem tasks.
 use \sndsgd\fs\Dir;
 use \sndsgd\fs\File;
 
-# lets assume /tmp/some doesn't exist
+# lets assume `/tmp/some` doesn't exist
 $path = "/tmp/some/deep/path/file.txt";
 
 # write to a file that doesn't exist in a directory that doesn't exist
-$file = new File($path);
+$file = Fs::getFile($path);
 if ($file->write("the contents...") === false) {
    throw new Exception($file->getError());
 }
@@ -32,7 +32,7 @@ if ($file->write("the contents...") === false) {
 
 This project is unstable and subject to changes from release to release. If you intend to depend on this project, be sure to make note of and specify the version in your project's `composer.json`. Doing so will ensure any breaking changes do not break your project.
 
-You need **PHP >= 5.4.0** to use this library, however, the latest stable version of PHP is recommended.
+You need **PHP >= 7.0.0** to use this library.
 
 
 ## Install
@@ -41,22 +41,4 @@ Install `sndsgd/fs` using [Composer](https://getcomposer.org/).
 
 ```
 composer require sndsgd/fs
-```
-
-
-## Testing
-
-Use [PHPUnit](https://phpunit.de/) to run unit tests.
-
-```
-vendor/bin/phpunit
-```
-
-
-## Documentation
-
-Use [ApiGen](http://apigen.org/) to create docs.
-
-```
-apigen generate
 ```
