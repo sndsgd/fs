@@ -16,7 +16,7 @@
     },
     "require": {
         "php": ">=7.0.0",
-        "sndsgd/util": "0.7.2"
+        "sndsgd/util": "dev-php7"
     },
     "require-dev": {
         "mikey179/vfsStream": "1.6.2"  
