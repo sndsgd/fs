@@ -14,8 +14,7 @@ A filesystem toolkit for PHP.
 The classes in `sndsgd\fs` attempt to simplify tedious filesystem tasks.
 
 ```php
-use \sndsgd\fs\Dir;
-use \sndsgd\fs\File;
+use \sndsgd\Fs;
 
 # lets assume `/tmp/some` doesn't exist
 $path = "/tmp/some/deep/path/file.txt";
