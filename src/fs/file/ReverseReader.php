@@ -73,7 +73,7 @@ class ReverseReader implements \Iterator
 
     /**
      * @param string $path The absolute path to the file to read
-     * @param string $newliubne [<description>]
+     * @param string $newline The newline character(s) to use
      */
     public function __construct(
         string $path,
