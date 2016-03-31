@@ -125,7 +125,7 @@ class Temp
      *
      * @param \sndsgd\fs\EntityAbstract $entity
      */
-    private static function registerEntity(EntityAbstract $entity)
+    protected static function registerEntity(EntityAbstract $entity)
     {
         if (count(self::$entities) === 0) {
             register_shutdown_function("sndsgd\\fs\\Temp::cleanup");
