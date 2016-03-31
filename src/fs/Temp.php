@@ -21,7 +21,7 @@ class Temp
     /**
      * All created paths are added here for easy removal at script exit
      *
-     * @var array<string,boolean|null>
+     * @var array<string,\sndsgd\fs\EntityAbstract>
      */
     private static $entities = [];
 
