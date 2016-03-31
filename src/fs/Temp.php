@@ -59,11 +59,13 @@ class Temp
      * Create a temp directory
      *
      * @param string $prefix A directory name prefix
+     * @param int $mode The permissions for the new directory
      * @param int $maxAttempts The max number of times to call mkdir
      * @return \sndsgd\fs\Dir
      */
     public static function createDir(
         string $prefix = "tmp",
+        int $mode = 0777,
         int $maxAttempts = 10
     ): Dir
     {
