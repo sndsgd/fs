@@ -192,7 +192,7 @@ class File extends EntityAbstract
 
         # if the overall filesize is greater than `maxMemory`, write efficiently
         if ($endsize > $maxMemory) {
-            return $this->prependFileInPlace($contents, $len, $size, $endsize);
+            return $this->prependFileInPlace($contents, $len, $endsize);
         }
 
         # use file_get/put_contents to handle the operation
@@ -208,11 +208,10 @@ class File extends EntityAbstract
     /**
      * @param string $contents
      * @param int $len
-     * @param int $size
      * @param int $endsize
      * @return boolean
      */
-    private function prependFileInPlace($contents, $len, $size, $endsize)
+    private function prependFileInPlace($contents, $len, $endsize)
     {
         $fh = fopen($this->path, "r+");
         $oldcontent = fread($fh, $len);
