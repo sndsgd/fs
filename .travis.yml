@@ -5,7 +5,7 @@ php:
 
 script:
   - composer install
-  - phpunit --coverage-clover build/coverage-clover.xml
+  - phpunit --coverage-clover build/coverage/clover.xml
 
 after_script:
-  - '[ "7.0" = "$(phpenv version-name)" ] && composer require satooshi/php-coveralls:dev-master && vendor/bin/coveralls -v'
+  - vendor/bin/coveralls -v
