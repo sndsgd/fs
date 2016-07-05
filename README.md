@@ -1,9 +1,9 @@
 # sndsgd/fs
 
-[![Latest Version](https://img.shields.io/github/release/sndsgd/sndsgd-fs.svg?style=flat-square)](https://github.com/sndsgd/sndsgd-fs/releases)
-[![Software License](https://img.shields.io/badge/license-MIT-brightgreen.svg?style=flat-square)](https://github.com/sndsgd/sndsgd-fs/LICENSE)
-[![Build Status](https://img.shields.io/travis/sndsgd/sndsgd-fs/master.svg?style=flat-square)](https://travis-ci.org/sndsgd/sndsgd-fs)
-[![Coverage Status](https://img.shields.io/coveralls/sndsgd/sndsgd-fs.svg?style=flat-square)](https://coveralls.io/r/sndsgd/sndsgd-fs?branch=master)
+[![Latest Version](https://img.shields.io/github/release/sndsgd/fs.svg?style=flat-square)](https://github.com/sndsgd/fs/releases)
+[![Software License](https://img.shields.io/badge/license-MIT-brightgreen.svg?style=flat-square)](https://github.com/sndsgd/fs/LICENSE)
+[![Build Status](https://img.shields.io/travis/sndsgd/fs/master.svg?style=flat-square)](https://travis-ci.org/sndsgd/fs)
+[![Coverage Status](https://img.shields.io/coveralls/sndsgd/fs.svg?style=flat-square)](https://coveralls.io/r/sndsgd/fs?branch=master)
 [![Total Downloads](https://img.shields.io/packagist/dt/sndsgd/fs.svg?style=flat-square)](https://packagist.org/packages/sndsgd/fs)
 
 A filesystem toolkit for PHP.
