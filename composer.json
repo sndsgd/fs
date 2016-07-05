@@ -2,7 +2,7 @@
     "name": "sndsgd/fs",
     "description": "A filesystem toolkit for PHP",
     "type": "library",
-    "homepage": "https://github.com/sndsgd/sndsgd-fs",
+    "homepage": "https://github.com/sndsgd/fs",
     "license": "MIT",
     "authors": [
         {
@@ -11,8 +11,8 @@
         }
     ],
     "support": {
-        "issues": "https://github.com/sndsgd/sndsgd-fs/issues",
-        "source": "https://github.com/sndsgd/sndsgd-fs/tree/master"
+        "issues": "https://github.com/sndsgd/fs/issues",
+        "source": "https://github.com/sndsgd/fs/tree/master"
     },
     "require": {
         "php": ">=7.0.0",
