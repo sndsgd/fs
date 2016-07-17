@@ -192,6 +192,26 @@ class FileEntityTest extends \sndsgd\fs\TestCase
     }
 
     /**
+     * @covers ::hasExtension
+     * @dataProvider providerHasExtension
+     */
+    public function testHasExtension($name, $test, $expect)
+    {
+        $file = new FileEntity($name);
+        $this->assertSame($expect, $file->hasExtension($test));
+    }
+
+    public function providerHasExtension()
+    {
+        return [
+            ["file.txt", "txt", true],
+            ["file.txt", "TXT", true],
+            ["/some/path/file", "txt", false],
+            ["/some/path/file.BZ2", "bz2", true],
+        ];
+    }
+
+    /**
      * @covers ::getExtension
      * @dataProvider providerGetExtension
      */
