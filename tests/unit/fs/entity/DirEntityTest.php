@@ -169,7 +169,7 @@ class DirEntityTest extends \sndsgd\fs\TestCase
             ->chgrp(vfsStream::GROUP_ROOT)
             ->chown(vfsStream::OWNER_ROOT);
 
-        $mock = $this->getMockBuilder("sndsgd\\fs\\Dir")
+        $mock = $this->getMockBuilder(DirEntity::class)
             ->setConstructorArgs([ vfsStream::url($testdir->path()) ])
             ->setMethods(["test"])
             ->getMock();
@@ -196,7 +196,7 @@ class DirEntityTest extends \sndsgd\fs\TestCase
             ->chown(vfsStream::OWNER_ROOT);   
 
 
-        $mock = $this->getMockBuilder("sndsgd\\fs\\Dir")
+        $mock = $this->getMockBuilder(DirEntity::class)
             ->setConstructorArgs([ vfsStream::url($vdir->path()) ])
             ->setMethods(["test"])
             ->getMock();
@@ -224,7 +224,7 @@ class DirEntityTest extends \sndsgd\fs\TestCase
             ->chown(vfsStream::OWNER_ROOT);   
 
 
-        $mock = $this->getMockBuilder("sndsgd\\fs\\Dir")
+        $mock = $this->getMockBuilder(DirEntity::class)
             ->setConstructorArgs([ vfsStream::url($vdir->path()) ])
             ->setMethods(["test"])
             ->getMock();
