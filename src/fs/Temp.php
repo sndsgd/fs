@@ -21,7 +21,7 @@ class Temp
     /**
      * All created paths are added here for easy removal at script exit
      *
-     * @var array<string,\sndsgd\fs\EntityAbstract>
+     * @var array<string,\sndsgd\fs\entity\EntityInterface>
      */
     private static $entities = [];
 
@@ -35,8 +35,8 @@ class Temp
     public static function setDir(string $path = "")
     {
         if ($path !== "") {
-            $dir = new Dir($path);
-            if (!$dir->test(Dir::READABLE | Dir::WRITABLE)) {
+            $dir = new entity\DirEntity($path);
+            if (!$dir->test(\sndsgd\Fs::READABLE | \sndsgd\Fs::WRITABLE)) {
                 throw new \InvalidArgumentException(
                     "invalid value provided for 'path'; ".$dir->getError()
                 );
@@ -67,12 +67,13 @@ class Temp
         string $prefix = "tmp",
         int $mode = 0777,
         int $maxAttempts = 10
-    ): Dir
+    ): entity\DirEntity
     {
         $tmpdir = static::getDir();
         $prefix = \sndsgd\Fs::sanitizeName($prefix);
-        $attempts = 1;
+        $attempts = 0;
         do {
+            $attempts++;
             if ($attempts > $maxAttempts) {
                 throw new \RuntimeException(
                     "failed to create temp directory; ".
@@ -81,11 +82,10 @@ class Temp
             }
             $rand = \sndsgd\Str::random(10);
             $path = "$tmpdir/$prefix-$rand";
-            $attempts++;
         }
         while (@mkdir($path, $mode) === false);
 
-        $dir = new Dir($path);
+        $dir = new entity\DirEntity($path);
         static::registerEntity($dir);
         return $dir;
     }
@@ -99,7 +99,7 @@ class Temp
     public static function createFile(
         string $prefix,
         int $maxAttempts = 10
-    ): File
+    ): entity\FileEntity
     {
         $tmpdir = static::getDir();
         $prefix = \sndsgd\Fs::sanitizeName($prefix);
@@ -117,7 +117,7 @@ class Temp
         }
         while (file_exists($path));
         touch($path);
-        $file = new File($path);
+        $file = new entity\FileEntity($path);
         static::registerEntity($file);
         return $file;
     }
@@ -125,9 +125,9 @@ class Temp
     /**
      * Register an entity to be deleted when the script exits
      *
-     * @param \sndsgd\fs\EntityAbstract $entity
+     * @param \sndsgd\fs\entity\EntityInterface $entity
      */
-    protected static function registerEntity(EntityAbstract $entity)
+    protected static function registerEntity(entity\EntityInterface $entity)
     {
         if (count(self::$entities) === 0) {
             register_shutdown_function("sndsgd\\fs\\Temp::cleanup");
@@ -138,7 +138,7 @@ class Temp
     /**
      * Remove all temp files & directories created since script start
      *
-     * @return boolean Indicates whether all files were successfully removed
+     * @return bool Indicates whether all files were successfully removed
      */
     public static function cleanup(): bool
     {

@@ -138,7 +138,7 @@ class ReverseReader implements \Iterator
 
     /**
      * @see http://php.net/manual/en/class.iterator.php
-     * @return boolean
+     * @return bool
      */
     public function valid()
     {

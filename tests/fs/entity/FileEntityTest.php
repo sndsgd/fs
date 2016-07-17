@@ -1,28 +1,26 @@
 <?php
 
-namespace sndsgd\fs;
+namespace sndsgd\fs\entity;
 
 use \org\bovigo\vfs\vfsStream;
-use \sndsgd\Str;
-
 
 /**
- * @coversDefaultClass \sndsgd\fs\File
+ * @coversDefaultClass \sndsgd\fs\entity\FileEntity
  */
-class FileTest extends TestCase
+class FileEntityTest extends \sndsgd\fs\TestCase
 {
     /**
      * @coversNothing
      */
     private function createTestFile()
     {
-        $rand = Str::random(10);
+        $rand = \sndsgd\Str::random(10);
         $path = vfsStream::url("root/$rand.txt");
         $fp = fopen($path, "w");
         $bytes = 0;
         $len = rand(100, 200);
         for ($i=0; $i<$len; $i++) {
-            $bytes += fwrite($fp, Str::random(rand(5000, 10000)).PHP_EOL);
+            $bytes += fwrite($fp, \sndsgd\Str::random(rand(5000, 10000)).PHP_EOL);
         }
         fclose($fp);
         return [$path, $bytes, $len];
@@ -30,25 +28,25 @@ class FileTest extends TestCase
 
     /**
      * @covers ::test
-     * @covers \sndsgd\fs\EntityAbstract::test
+     * @covers \sndsgd\fs\entity\EntityAbstract::test
      * @dataProvider providerTest
      */
     public function testTest($path, $test, $expect)
     {
-        $file = new File(vfsStream::url($path));
+        $file = new FileEntity(vfsStream::url($path));
         $this->assertSame($expect, $file->test($test));
     }
 
     public function providerTest()
     {
         return [
-            ["root/does/not/exist.txt", File::EXISTS, false],
-            ["root/file.rw-", File::READABLE, true],
-            ["root/file.-w-", File::READABLE, false],
-            ["root/dir.rwx", File::READABLE, false],
-            ["root/file.---", File::READABLE, false],
-            ["root/file.---", File::WRITABLE, false],
-            ["root/file.---", File::EXECUTABLE, false],
+            ["root/does/not/exist.txt", \sndsgd\Fs::EXISTS, false],
+            ["root/file.rw-", \sndsgd\Fs::READABLE, true],
+            ["root/file.-w-", \sndsgd\Fs::READABLE, false],
+            ["root/dir.rwx", \sndsgd\Fs::READABLE, false],
+            ["root/file.---", \sndsgd\Fs::READABLE, false],
+            ["root/file.---", \sndsgd\Fs::WRITABLE, false],
+            ["root/file.---", \sndsgd\Fs::EXECUTABLE, false],
         ];
     }
 
@@ -58,7 +56,7 @@ class FileTest extends TestCase
      */
     public function testPrepareWrite($path, $expect)
     {
-        $file = new File(vfsStream::url($path));
+        $file = new FileEntity(vfsStream::url($path));
         $this->assertSame($expect, $file->prepareWrite());
     }
 
@@ -77,9 +75,9 @@ class FileTest extends TestCase
      */
     public function testGetDir()
     {
-        $file = new File("/test/dir/file.txt");
+        $file = new FileEntity("/test/dir/file.txt");
         $dir = $file->getDir();
-        $this->assertInstanceOf("sndsgd\\fs\\Dir", $dir);
+        $this->assertInstanceOf(\sndsgd\fs\entity\DirEntity::class, $dir);
         $this->assertEquals("/test/dir", $dir->getPath());
     }
 
@@ -90,7 +88,7 @@ class FileTest extends TestCase
     public function testGetByteSize($path, $size, $testResult, $expect)
     {
         $path = vfsStream::url($path);
-        $mock = $this->getMockBuilder("sndsgd\\fs\\File")
+        $mock = $this->getMockBuilder(\sndsgd\fs\entity\FileEntity::class)
             ->setConstructorArgs([$path])
             ->setMethods(["test"])
             ->getMock();
@@ -100,7 +98,7 @@ class FileTest extends TestCase
         # vfsstream under php7 seems is a little weird
         # is_writable wasn't working properly here
         if ($size > 0) {
-            file_put_contents($path, Str::random($size));
+            file_put_contents($path, \sndsgd\Str::random($size));
         }
         $this->assertSame($expect, $mock->getByteSize());
     }
@@ -158,7 +156,7 @@ class FileTest extends TestCase
      */
     public function testCanWrite($path, $expect)
     {
-        $file = new File(vfsStream::url($path));
+        $file = new FileEntity(vfsStream::url($path));
         $this->assertSame($expect, $file->canWrite());
     }
 
@@ -178,7 +176,7 @@ class FileTest extends TestCase
      */
     public function testRemove($path, $expect)
     {
-        $file = new File(vfsStream::url($path));
+        $file = new FileEntity(vfsStream::url($path));
         $this->assertSame($expect, $file->remove());
         if ($expect === true) {
             $this->assertFalse(file_exists($file));
@@ -199,7 +197,7 @@ class FileTest extends TestCase
      */
     public function testGetExtension($name, $defaultExt, $expect)
     {
-        $file = new File($name);
+        $file = new FileEntity($name);
         if ($defaultExt === null) {
             $result = $file->getExtension();
         }
@@ -229,7 +227,7 @@ class FileTest extends TestCase
      */
     public function testSplitName($name, $defaultExt, $expectName, $expectExt)
     {
-        $file = new File($name);
+        $file = new FileEntity($name);
         if ($defaultExt === null) {
             $result = $file->splitName();
         }
@@ -269,9 +267,9 @@ class FileTest extends TestCase
     public function testWrite()
     {
         $path = vfsStream::url("root/some/new/path/file.txt");
-        $contents = Str::random(rand(100, 1000));
+        $contents = \sndsgd\Str::random(rand(100, 1000));
         $this->assertFalse(file_exists($path));
-        $file = new File($path);
+        $file = new FileEntity($path);
         $file->write($contents);
         $this->assertTrue(file_exists($path));
         $this->assertEquals($contents, file_get_contents($path));
@@ -287,8 +285,8 @@ class FileTest extends TestCase
     public function testWritePrepareFailure()
     {
         $path = vfsStream::url("root/dir.--x/file.txt");
-        $contents = Str::random(rand(100, 1000));
-        $file = new File($path);
+        $contents = \sndsgd\Str::random(rand(100, 1000));
+        $file = new FileEntity($path);
         $this->assertFalse($file->write($contents));
         $this->assertTrue(is_string($file->getError()));
     }
@@ -311,9 +309,9 @@ class FileTest extends TestCase
     private function preparePrependTest($len)
     {
         $path = vfsStream::url("root/ile.txt");
-        $contents = Str::random($len);
+        $contents = \sndsgd\Str::random($len);
         file_put_contents($path, $contents);
-        $str = Str::random(100);
+        $str = \sndsgd\Str::random(100);
         $expect = $str.$contents;
         return [$path, $contents, $str, $expect];
     }
@@ -324,7 +322,7 @@ class FileTest extends TestCase
     public function testPrepend()
     {
         list($path, $contents, $str, $expect) = $this->preparePrependTest(1024);
-        $file = new File($path);
+        $file = new FileEntity($path);
         $this->assertTrue($file->prepend($str));
         $this->assertEquals($expect, file_get_contents($path));
     }
@@ -334,7 +332,7 @@ class FileTest extends TestCase
      */
     public function testPrependCannotWrite()
     {
-        $file = new File(vfsStream::url("root/file.---"));
+        $file = new FileEntity(vfsStream::url("root/file.---"));
         $this->assertFalse($file->prepend("42"));
         $this->assertTrue(is_string($file->getError()));
     }
@@ -346,7 +344,7 @@ class FileTest extends TestCase
     public function testPrependInPlace()
     {
         list($path, $contents, $str, $expect) = $this->preparePrependTest(1024);
-        $file = new File($path);
+        $file = new FileEntity($path);
         $this->assertTrue($file->prepend($str, 512));
         $this->assertEquals($expect, file_get_contents($path));
     }
@@ -383,7 +381,7 @@ class FileTest extends TestCase
     public function testAppend()
     {
         $path = vfsStream::url("root/file.rw-");
-        $file = new File($path);
+        $file = new FileEntity($path);
         $file->write("123");
         $file->append("456789");
         $this->assertEquals("123456789", file_get_contents($path));
@@ -395,7 +393,7 @@ class FileTest extends TestCase
      */
     public function testReadFailure()
     {
-        $file = new File(vfsStream::url("root/dir.--x/file.txt"));
+        $file = new FileEntity(vfsStream::url("root/dir.--x/file.txt"));
         $this->assertFalse($file->read());
         $this->assertTrue(is_string($file->getError()));
     }
@@ -407,13 +405,13 @@ class FileTest extends TestCase
     public function testRead()
     {
         # success
-        $file = new File(vfsStream::url("root/file.rwx"));
+        $file = new FileEntity(vfsStream::url("root/file.rwx"));
         $this->assertSame("contents...", $file->read());
 
         $this->assertSame("contents...", file_get_contents($file));
 
         # permissions
-        $file = new File(vfsStream::url("root/file.---"));
+        $file = new FileEntity(vfsStream::url("root/file.---"));
         $this->assertFalse($file->read());
     }
 
@@ -438,7 +436,7 @@ class FileTest extends TestCase
     public function testGetLineCount()
     {
         list($path, $bytes, $lines) = $this->createTestFile();
-        $file = new File($path);
+        $file = new FileEntity($path);
         $this->assertEquals($lines, $file->getLineCount());
     }
 

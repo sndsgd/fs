@@ -58,7 +58,7 @@ class TempTest extends TestCase
     {
         Temp::setDir($tmpdir);
         $dir = Temp::createDir($prefix, $maxAttempts);
-        $this->assertInstanceOf("sndsgd\\fs\\Dir", $dir);
+        $this->assertInstanceOf(\sndsgd\fs\entity\DirEntity::class, $dir);
         $this->assertSame(0, strpos($dir, "$tmpdir/$prefix-"));
     }
 
@@ -77,7 +77,7 @@ class TempTest extends TestCase
     {
         Temp::setDir($tmpdir);
         $file = Temp::createFile($prefix);
-        $this->assertInstanceOf("sndsgd\\fs\\File", $file);
+        $this->assertInstanceOf(\sndsgd\fs\entity\FileEntity::class, $file);
         $this->assertSame(0, strpos($file, "$tmpdir/$prefix-"));
     }
 

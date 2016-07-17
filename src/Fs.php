@@ -17,10 +17,18 @@ class Fs
     const BYTES_PER_PB = 1125899906842624;
     const BYTES_PER_EB = 1152921504606846976;
 
+    # bitmask values for use in sndsgd\fs\entity\EntityInterface::test()
+    const EXISTS = 1;
+    const DIR = 2;
+    const FILE = 4;
+    const READABLE = 8;
+    const WRITABLE = 16;
+    const EXECUTABLE = 32;
+
     /**
      * Format a bytesize into a human readable string
      * Note: precision will be ignored for results less than a KB
-     * 
+     *
      * @param int $bytes The number fo bytes to format
      * @param int $precision The number of decimal places to round to
      * @param string $point Decimal point
@@ -28,9 +36,9 @@ class Fs
      * @return string
      */
     public static function formatSize(
-        int $bytes, 
-        int $precision = 0, 
-        string $point = ".", 
+        int $bytes,
+        int $precision = 0,
+        string $point = ".",
         string $sep = ","
     ): string
     {
@@ -68,9 +76,9 @@ class Fs
      * @param string $path
      * @return \sndsgd\fs\Dir
      */
-    public static function getDir(string $path): Dir
+    public static function getDir(string $path): fs\entity\DirEntity
     {
-        return (new Dir($path))->normalize();
+        return (new fs\entity\DirEntity($path))->normalize();
     }
 
     /**
@@ -79,8 +87,23 @@ class Fs
      * @param string $path
      * @return \sndsgd\fs\File
      */
-    public static function getFile(string $path): File
+    public static function getFile(string $path): fs\entity\FileEntity
     {
-        return (new File($path))->normalize();
+        return (new fs\entity\FileEntity($path))->normalize();
+    }
+
+    /**
+     * Create an entity from an instance of \SplFileInfo
+     *
+     * @param \SplFileInfo $info
+     * @return \sndsgd\fs\EntityInterface
+     */
+    public static function createFromSplFileInfo(\SplFileInfo $info)
+    {
+        $realpath = $info->getRealPath();
+        if ($info->isFile()) {
+            return new fs\entity\FileEntity($realpath);
+        }
+        return new fs\entity\DirEntity($realpath);
     }
 }

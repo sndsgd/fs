@@ -1,21 +1,13 @@
 <?php
 
-namespace sndsgd\fs;
+namespace sndsgd\fs\entity;
 
 /**
  * Base class for filesystem entities
  */
-abstract class EntityAbstract
+abstract class EntityAbstract implements EntityInterface
 {
     use \sndsgd\ErrorTrait;
-
-    # bitmask values for use in sndsgd\fs\Entity::test()
-    const EXISTS = 1;
-    const DIR = 2;
-    const FILE = 4;
-    const READABLE = 8;
-    const WRITABLE = 16;
-    const EXECUTABLE = 32;
 
     /**
      * The path as provided to the constructor
@@ -45,6 +37,26 @@ abstract class EntityAbstract
     }
 
     /**
+     * Determine whether the entity is a directory
+     * 
+     * @return bool
+     */
+    public function isDir(): bool
+    {
+        return ($this instanceof \sndsgd\fs\entity\DirEntity);
+    }
+
+    /**
+     * Determine whether the entity is a file
+     * 
+     * @return bool
+     */
+    public function isFile(): bool
+    {
+        return ($this instanceof \sndsgd\fs\entity\FileEntity);
+    }
+
+    /**
      * Get the path as a string
      * 
      * @return string
@@ -58,51 +70,36 @@ abstract class EntityAbstract
      * Perform type/permissions tests on an entity
      *
      * @param int $opts
-     * @return boolean
+     * @return bool
      */
     public function test(int $opts): bool
     {
-        if ($opts & self::EXISTS && file_exists($this->path) === false) {
+        if ($opts & \sndsgd\Fs::EXISTS && file_exists($this->path) === false) {
             $this->error = "'{$this->path}' does not exist";
             return false;
         }
-        else if ($opts & self::FILE && is_file($this->path) === false) {
+        else if ($opts & \sndsgd\Fs::FILE && is_file($this->path) === false) {
             $this->error = "'{$this->path}' is not a file";
             return false;
         }
-        else if ($opts & self::DIR && is_dir($this->path) === false) {
+        else if ($opts & \sndsgd\Fs::DIR && is_dir($this->path) === false) {
             $this->error = "'{$this->path}' is not a directory";
             return false;
         }
-        else if ($opts & self::READABLE && is_readable($this->path) === false) {
+        else if ($opts & \sndsgd\Fs::READABLE && is_readable($this->path) === false) {
             $this->error = "'{$this->path}' is not readable";
             return false;
         }
-        else if ($opts & self::WRITABLE && is_writable($this->path) === false) {
+        else if ($opts & \sndsgd\Fs::WRITABLE && is_writable($this->path) === false) {
             $this->error = "'{$this->path}' is not writable";
             return false;
         }
-        else if ($opts & self::EXECUTABLE && is_executable($this->path) === false) {
+        else if ($opts & \sndsgd\Fs::EXECUTABLE && is_executable($this->path) === false) {
             $this->error = "'{$this->path}' is not executable";
             return false;
         }
         return true;
     }
-
-    /**
-     * Determine if a path can be written to
-     * 
-     * @return boolean
-     */
-    abstract public function canWrite();
-
-    /**
-     * Prepare an entity for writing by creating non existing parents
-     * 
-     * @param  integer $mode The octal permissions value for directories
-     * @return boolean
-     */
-    abstract public function prepareWrite($mode = 0775);
 
     /**
      * Get the parent directory
@@ -117,15 +114,13 @@ abstract class EntityAbstract
             return null;
         }
 
-        return new Dir($path);
+        return new DirEntity($path);
     }
 
     /**
-     * Determine whether or not a path is absolute
-     * 
-     * @return string
+     * {@inheritdoc}
      */
-    public function isAbsolute()
+    public function isAbsolute(): bool
     {
         return $this->path{0} === "/";
     }
@@ -133,9 +128,9 @@ abstract class EntityAbstract
     /**
      * Normalize a path to remove dots
      * 
-     * @return string
+     * @return \sndsgd\fs\EntityInterface
      */
-    public function normalize()
+    public function normalize(): EntityInterface
     {
         $path = rtrim($this->path, DIRECTORY_SEPARATOR);
         if ($path{0} === ".") {
@@ -179,10 +174,7 @@ abstract class EntityAbstract
     }
 
     /**
-     * Normalize the path to a directory
-     *
-     * @param string $dir
-     * @return string
+     * {@inheritdoc}
      */
     public function normalizeTo($dir)
     {
@@ -199,7 +191,7 @@ abstract class EntityAbstract
      * @param string $path
      * @return string
      */
-    public function getRelativePath($path)
+    public function getRelativePath($path): string
     {
         $path = (string) $path;
         $from = $this->path;
