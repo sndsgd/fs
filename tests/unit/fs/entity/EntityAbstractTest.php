@@ -1,18 +1,15 @@
 <?php
 
-namespace sndsgd\fs;
+namespace sndsgd\fs\entity;
 
-use \ReflectionClass;
 use \org\bovigo\vfs\vfsStream;
-use \sndsgd\Str;
-
 
 /**
- * @coversDefaultClass \sndsgd\fs\EntityAbstract
+ * @coversDefaultClass \sndsgd\fs\entity\EntityAbstract
  */
-class EntityAbstractTest extends TestCase
+class EntityAbstractTest extends \sndsgd\fs\TestCase
 {
-    const CLASSNAME = "sndsgd\\fs\\EntityAbstract";
+    const CLASSNAME = \sndsgd\fs\entity\EntityAbstract::class;
 
     private function getMockedEntity($path)
     {
@@ -24,7 +21,7 @@ class EntityAbstractTest extends TestCase
     {
         $this->path = "/test/dir/file.txt";
         $this->mock = $this->getMockedEntity($this->path);
-        $this->rc = new ReflectionClass(self::CLASSNAME);
+        $this->rc = new \ReflectionClass(self::CLASSNAME);
     }
 
     public function testCoreFuncs()
@@ -49,6 +46,28 @@ class EntityAbstractTest extends TestCase
     public function testToString()
     {
         $this->assertEquals($this->path, $this->mock->__toString());
+    }
+
+    /**
+     * @covers ::isDir
+     */
+    public function testIsDir()
+    {
+        $test = new FileEntity(__FILE__);
+        $this->assertFalse($test->isDir());
+        $test = new DirEntity(__DIR__);
+        $this->assertTrue($test->isDir());
+    }
+
+    /**
+     * @covers ::isFile
+     */
+    public function testIsFile()
+    {
+        $test = new FileEntity(__FILE__);
+        $this->assertTrue($test->isFile());
+        $test = new DirEntity(__DIR__);
+        $this->assertFalse($test->isFile());
     }
 
     /**
@@ -101,15 +120,15 @@ class EntityAbstractTest extends TestCase
         $mock = $this->getMockedEntity($path);
 
         $parent = $mock->getParent();
-        $this->assertInstanceof("sndsgd\\fs\\Dir", $parent);
+        $this->assertInstanceof(\sndsgd\fs\entity\DirEntity::class, $parent);
         $this->assertEquals("/test/path", $parent->getPath());
 
         $parent = $parent->getParent();
-        $this->assertInstanceof("sndsgd\\fs\\Dir", $parent);
+        $this->assertInstanceof(\sndsgd\fs\entity\DirEntity::class, $parent);
         $this->assertEquals("/test", $parent->getPath());
 
         $parent = $parent->getParent();
-        $this->assertInstanceof("sndsgd\\fs\\Dir", $parent);
+        $this->assertInstanceof(\sndsgd\fs\entity\DirEntity::class, $parent);
         $this->assertEquals("/", $parent->getPath());
 
         $this->assertNull($parent->getParent());

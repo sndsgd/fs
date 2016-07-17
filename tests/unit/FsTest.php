@@ -81,7 +81,7 @@ class FsTest extends \sndsgd\fs\TestCase
     public function testGetDir()
     {
         $test = Fs::getDir("/some/dir");
-        $this->assertInstanceOf("sndsgd\\fs\\Dir", $test);
+        $this->assertInstanceOf(\sndsgd\fs\entity\DirEntity::class, $test);
     }
 
     /**
@@ -90,6 +90,24 @@ class FsTest extends \sndsgd\fs\TestCase
     public function testGetFile()
     {
         $test = Fs::getFile("/some/file.ext");
-        $this->assertInstanceOf("sndsgd\\fs\\File", $test);
+        $this->assertInstanceOf(\sndsgd\fs\entity\FileEntity::class, $test);
+    }
+
+    /**
+     * @covers ::createFromSplFileInfo
+     * @dataProvider providerCreateFromSplFileInfo
+     */
+    public function testCreateFromSplFileInfo($test, $expectInstance)
+    {
+        $result = Fs::createFromSplFileInfo($test);
+        $this->assertInstanceOf($expectInstance, $result);
+    }
+
+    public function providerCreateFromSplFileInfo()
+    {
+        return [
+            [new \SplFileInfo(__FILE__), \sndsgd\fs\entity\FileEntity::class],
+            [new \SplFileInfo(__DIR__), \sndsgd\fs\entity\DirEntity::class],
+        ];
     }
 }

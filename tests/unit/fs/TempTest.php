@@ -58,7 +58,7 @@ class TempTest extends TestCase
     {
         Temp::setDir($tmpdir);
         $dir = Temp::createDir($prefix, $maxAttempts);
-        $this->assertInstanceOf("sndsgd\\fs\\Dir", $dir);
+        $this->assertInstanceOf(\sndsgd\fs\entity\DirEntity::class, $dir);
         $this->assertSame(0, strpos($dir, "$tmpdir/$prefix-"));
     }
 
@@ -77,7 +77,7 @@ class TempTest extends TestCase
     {
         Temp::setDir($tmpdir);
         $file = Temp::createFile($prefix);
-        $this->assertInstanceOf("sndsgd\\fs\\File", $file);
+        $this->assertInstanceOf(\sndsgd\fs\entity\FileEntity::class, $file);
         $this->assertSame(0, strpos($file, "$tmpdir/$prefix-"));
     }
 
@@ -96,7 +96,7 @@ class TempTest extends TestCase
      */
     public function testCreateException($fn, $tmpdir, $prefix, $maxAttempts)
     {
-        $rc = new \ReflectionClass("sndsgd\\fs\\Temp");
+        $rc = new \ReflectionClass(Temp::class);
         $property = $rc->getProperty("dir");
         $property->setAccessible(true);
         $property->setValue($tmpdir);
@@ -121,7 +121,7 @@ class TempTest extends TestCase
      */
     public function testRegisterEntity(array $entities)
     {
-        $rc = new \ReflectionClass("sndsgd\\fs\\Temp");
+        $rc = new \ReflectionClass(Temp::class);
         $method = $rc->getMethod("registerEntity");
         $method->setAccessible(true);
         $property = $rc->getProperty("entities");
@@ -158,7 +158,7 @@ class TempTest extends TestCase
      */
     public function testCleanup(array $entities, $expect)
     {
-        $rc = new \ReflectionClass("sndsgd\\fs\\Temp");
+        $rc = new \ReflectionClass(Temp::class);
         $method = $rc->getMethod("registerEntity");
         $method->setAccessible(true);
 
@@ -171,46 +171,48 @@ class TempTest extends TestCase
 
     public function providerCleanup()
     {
+        $dir = \sndsgd\fs\entity\DirEntity::class;
+        $file = \sndsgd\fs\entity\FileEntity::class;
         return [
             [
                 [
-                    $this->createRemoveMock("Dir", true),
+                    $this->createRemoveMock($dir, true),
                 ],
                 true
             ],
             [
                 [
-                    $this->createRemoveMock("File", true),
+                    $this->createRemoveMock($file, true),
                 ],
                 true
             ],
             [
                 [
-                    $this->createRemoveMock("Dir", false),
+                    $this->createRemoveMock($dir, false),
                 ],
                 false
             ],
             [
                 [
-                    $this->createRemoveMock("File", false),
+                    $this->createRemoveMock($file, false),
                 ],
                 false
             ],
 
             [
                 [
-                    $this->createRemoveMock("Dir", true),
-                    $this->createRemoveMock("File", true),
+                    $this->createRemoveMock($dir, true),
+                    $this->createRemoveMock($file, true),
                 ],
                 true
             ],
 
             [
                 [
-                    $this->createRemoveMock("Dir", true),
-                    $this->createRemoveMock("Dir", true),
-                    $this->createRemoveMock("Dir", false),
-                    $this->createRemoveMock("File", true),
+                    $this->createRemoveMock($dir, true),
+                    $this->createRemoveMock($dir, true),
+                    $this->createRemoveMock($dir, false),
+                    $this->createRemoveMock($file, true),
                 ],
                 false
             ],
@@ -221,7 +223,7 @@ class TempTest extends TestCase
     {
         $path = "/tmp/".Str::random(10)."/".Str::random(10)."/".Str::random(10);
 
-        $ret = $this->getMockBuilder("sndsgd\\fs\\$class")
+        $ret = $this->getMockBuilder($class)
             ->setConstructorArgs([$path])
             ->setMethods(["remove"])
             ->getMock();

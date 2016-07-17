@@ -1,34 +1,32 @@
 <?php
 
-namespace sndsgd\fs;
+namespace sndsgd\fs\entity;
 
 use \org\bovigo\vfs\vfsStream;
-use \sndsgd\Str;
-
 
 /**
- * @coversDefaultClass \sndsgd\fs\Dir
+ * @coversDefaultClass \sndsgd\fs\entity\DirEntity
  */
-class DirTest extends TestCase
+class DirEntityTest extends \sndsgd\fs\TestCase
 {
     /**
      * @covers ::test
-     * @covers \sndsgd\fs\EntityAbstract::test
+     * @covers \sndsgd\fs\entity\EntityAbstract::test
      */
     public function testTest()
     {
-        $dir = new Dir(vfsStream::url("root/emptydir"));
-        $this->assertTrue($dir->test(Dir::EXISTS));
+        $dir = new DirEntity(vfsStream::url("root/emptydir"));
+        $this->assertTrue($dir->test(\sndsgd\Fs::EXISTS));
 
         $path = vfsStream::url("root/file.txt");
-        $dir = new Dir($path);
-        $this->assertFalse($dir->test(Dir::EXISTS));
+        $dir = new DirEntity($path);
+        $this->assertFalse($dir->test(\sndsgd\Fs::EXISTS));
         $this->assertEquals("'{$path}' is not a directory", $dir->getError());
 
-        $dir = new Dir(vfsStream::url("root/dir.--x"));
-        $this->assertFalse($dir->test(File::READABLE));
-        $this->assertFalse($dir->test(File::WRITABLE));
-        $this->assertFalse($dir->test(File::EXECUTABLE));
+        $dir = new DirEntity(vfsStream::url("root/dir.--x"));
+        $this->assertFalse($dir->test(\sndsgd\Fs::READABLE));
+        $this->assertFalse($dir->test(\sndsgd\Fs::WRITABLE));
+        $this->assertFalse($dir->test(\sndsgd\Fs::EXECUTABLE));
     }
 
     /**
@@ -36,10 +34,10 @@ class DirTest extends TestCase
      */
     public function testCanWrite()
     {
-        $dir = new Dir(vfsStream::url("root/test"));
+        $dir = new DirEntity(vfsStream::url("root/test"));
         $this->assertTrue($dir->canWrite());
 
-        $dir = new Dir(vfsStream::url("root/a/new/path"));
+        $dir = new DirEntity(vfsStream::url("root/a/new/path"));
         $this->assertTrue($dir->canWrite());
     }
 
@@ -48,19 +46,19 @@ class DirTest extends TestCase
      */
     public function testPrepareWrite()
     {
-        $dir = new Dir(vfsStream::url("root/test"));
+        $dir = new DirEntity(vfsStream::url("root/test"));
         $this->assertTrue($dir->prepareWrite());
 
         $path = vfsStream::url("root/test/a/new/dir");
         $this->assertFalse(file_exists($path));
-        $dir = new Dir($path);
+        $dir = new DirEntity($path);
         $this->assertTrue($dir->prepareWrite());
         $this->assertTrue(file_exists($path));
 
-        $dir = new Dir(vfsStream::url("root/file.txt/nope"));
+        $dir = new DirEntity(vfsStream::url("root/file.txt/nope"));
         $this->assertFalse($dir->prepareWrite());
 
-        $dir = new Dir(vfsStream::url("root/dir.--x/nope"));
+        $dir = new DirEntity(vfsStream::url("root/dir.--x/nope"));
         $this->assertFalse($dir->prepareWrite());
     }
 
@@ -69,9 +67,9 @@ class DirTest extends TestCase
      */
     public function testGetFile()
     {
-        $dir = new Dir("/test/dir");
+        $dir = new DirEntity("/test/dir");
         $file = $dir->getFile("file.txt");
-        $this->assertInstanceOf("sndsgd\\fs\\File", $file);
+        $this->assertInstanceOf(\sndsgd\fs\entity\FileEntity::class, $file);
         $this->assertEquals("/test/dir/file.txt", $file->getPath());
     }
 
@@ -81,7 +79,7 @@ class DirTest extends TestCase
      */
     public function testGetFileException()
     {
-        $dir = new Dir("/test/dir");
+        $dir = new DirEntity("/test/dir");
         $file = $dir->getFile([]);
     }
 
@@ -90,10 +88,10 @@ class DirTest extends TestCase
      */
     public function testIsEmpty()
     {
-        $dir = new Dir(vfsStream::url("root"));
+        $dir = new DirEntity(vfsStream::url("root"));
         $this->assertFalse($dir->isEmpty());
 
-        $dir = new Dir(vfsStream::url("root/test/emptydir"));
+        $dir = new DirEntity(vfsStream::url("root/test/emptydir"));
         $this->assertTrue($dir->isEmpty());
     }
 
@@ -103,7 +101,7 @@ class DirTest extends TestCase
      */
     public function testIsEmptyException()
     {
-        $dir = new Dir(vfsStream::url("root/dir.--x"));
+        $dir = new DirEntity(vfsStream::url("root/dir.--x"));
         $dir->isEmpty();
     }
 
@@ -112,7 +110,7 @@ class DirTest extends TestCase
      */
     public function testGetListAsStrings()
     {
-        $dir = new Dir(vfsStream::url("root"));
+        $dir = new DirEntity(vfsStream::url("root"));
         $files = $dir->getList(true);
         $this->assertTrue(is_array($files));
 
@@ -127,7 +125,7 @@ class DirTest extends TestCase
      */
     public function testGetListAsEntities()
     {
-        $dir = new Dir(vfsStream::url("root"));
+        $dir = new DirEntity(vfsStream::url("root"));
         $files = $dir->getList();
         $this->assertTrue(is_array($files));
 
@@ -141,7 +139,7 @@ class DirTest extends TestCase
      */
     public function testRemove()
     {
-        $dir = new Dir(vfsStream::url("root/test"));
+        $dir = new DirEntity(vfsStream::url("root/test"));
         $this->assertTrue($dir->remove());
     }
 
@@ -150,7 +148,7 @@ class DirTest extends TestCase
      */
     public function testRemoveNonExistingPath()
     {
-        $dir = new Dir(vfsStream::url("root/does/not/exist"));
+        $dir = new DirEntity(vfsStream::url("root/does/not/exist"));
         $this->assertFalse($dir->remove());
     }
 
@@ -171,7 +169,7 @@ class DirTest extends TestCase
             ->chgrp(vfsStream::GROUP_ROOT)
             ->chown(vfsStream::OWNER_ROOT);
 
-        $mock = $this->getMockBuilder("sndsgd\\fs\\Dir")
+        $mock = $this->getMockBuilder(DirEntity::class)
             ->setConstructorArgs([ vfsStream::url($testdir->path()) ])
             ->setMethods(["test"])
             ->getMock();
@@ -198,7 +196,7 @@ class DirTest extends TestCase
             ->chown(vfsStream::OWNER_ROOT);   
 
 
-        $mock = $this->getMockBuilder("sndsgd\\fs\\Dir")
+        $mock = $this->getMockBuilder(DirEntity::class)
             ->setConstructorArgs([ vfsStream::url($vdir->path()) ])
             ->setMethods(["test"])
             ->getMock();
@@ -226,7 +224,7 @@ class DirTest extends TestCase
             ->chown(vfsStream::OWNER_ROOT);   
 
 
-        $mock = $this->getMockBuilder("sndsgd\\fs\\Dir")
+        $mock = $this->getMockBuilder(DirEntity::class)
             ->setConstructorArgs([ vfsStream::url($vdir->path()) ])
             ->setMethods(["test"])
             ->getMock();

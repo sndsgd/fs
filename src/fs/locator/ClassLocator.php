@@ -92,7 +92,7 @@ class ClassLocator
             return "";
         }
 
-        $file = new \sndsgd\fs\File($file);
+        $file = new \sndsgd\fs\entity\FileEntity($file);
         $extension = $file->getExtension();
         if (strtolower($extension) !== "php") {
             return "";

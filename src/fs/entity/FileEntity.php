@@ -1,16 +1,15 @@
 <?php
 
-namespace sndsgd\fs;
+namespace sndsgd\fs\entity;
 
-
-class File extends EntityAbstract
+class FileEntity extends EntityAbstract
 {
     /**
      * {@inheritdoc}
      */
     public function test(int $opts): bool
     {
-        return parent::test($opts | self::FILE);
+        return parent::test($opts | \sndsgd\Fs::FILE);
     }
 
     /**
@@ -19,7 +18,7 @@ class File extends EntityAbstract
     public function canWrite(): bool
     {
         if (file_exists($this->path)) {
-            return $this->test(self::WRITABLE);
+            return $this->test(\sndsgd\Fs::WRITABLE);
         }
         return (($dir = $this->getParent()) !== null && $dir->canWrite());
     }
@@ -30,12 +29,12 @@ class File extends EntityAbstract
     public function prepareWrite($mode = 0775): bool
     {
         if (file_exists($this->path)) {
-            return $this->test(self::WRITABLE);
+            return $this->test(\sndsgd\Fs::WRITABLE);
         }
 
         $dir = $this->getParent();
         if ($dir->prepareWrite($mode) === false) {
-            $this->error = 
+            $this->error =
                 "failed to prepare '{$this->path}' for writing; ".$dir->getError();
             return false;
         }
@@ -48,9 +47,21 @@ class File extends EntityAbstract
      * @aliasof ::getParent
      * @return \sndsgd\fs\Dir
      */
-    public function getDir(): Dir
+    public function getDir(): DirEntity
     {
         return $this->getParent();
+    }
+
+    /**
+     * Determine if the entity has a given extension
+     *
+     * @param string $extension
+     * @return bool
+     */
+    public function hasExtension(string $extension): bool
+    {
+        $test = $this->getExtension();
+        return (strcasecmp($extension, $test) === 0);
     }
 
     /**
@@ -62,16 +73,16 @@ class File extends EntityAbstract
         $filename = basename($this->path);
         $extpos = strrpos($filename, ".");
         return ($extpos === false || $extpos === 0)
-            ? $default 
+            ? $default
             : substr($filename, $extpos + 1);
     }
 
     /**
      * Separate a filename and extension
-     * 
-     * bug (??) with pathinfo(): 
+     *
+     * bug (??) with pathinfo():
      * [http://bugs.php.net/bug.php?id=67048](http://bugs.php.net/bug.php?id=67048)
-     * 
+     *
      * Example Usage:
      * <code>
      * $path = '/path/to/file.txt';
@@ -80,7 +91,7 @@ class File extends EntityAbstract
      * $ext = File::splitName($path)[1];
      * // => 'txt'
      * </code>
-     * 
+     *
      * @param string $defaultExtension
      * @return array
      * - [0] string name
@@ -108,7 +119,7 @@ class File extends EntityAbstract
      */
     public function getByteSize(): int
     {
-        if ($this->test(self::READABLE) !== true) {
+        if ($this->test(\sndsgd\Fs::READABLE) !== true) {
             $this->error = "failed to stat filesize; {$this->error}";
             return -1;
         }
@@ -122,7 +133,7 @@ class File extends EntityAbstract
 
     /**
      * Get the filesize as a formatted string
-     * 
+     *
      * @param int $precision The number of decimal places to return
      * @param string $point The decimal point
      * @param string $sep The thousands separator
@@ -138,12 +149,12 @@ class File extends EntityAbstract
         if ($bytes === -1) {
             return "";
         }
-        return \sndsgd\Fs::formatSize($bytes, $precision, $point, $sep); 
+        return \sndsgd\Fs::formatSize($bytes, $precision, $point, $sep);
     }
 
     /**
      * Prepare and write to the file
-     * 
+     *
      * @param string $contents
      * @param int $opts Bitmask options to pass to `file_put_contents`
      * @return bool
@@ -159,8 +170,8 @@ class File extends EntityAbstract
 
     /**
      * @param string $contents
-     * @param int $opts 
-     * @return boolean
+     * @param int $opts
+     * @return bool
      */
     private function writeFile($contents, $opts)
     {
@@ -173,14 +184,14 @@ class File extends EntityAbstract
 
     /**
      * Prepend contents to a file
-     * 
+     *
      * @param string $contents The content to prepend to the file
      * @param int $maxMemory The max number of bytes to consume
-     * @return boolean
+     * @return bool
      */
     public function prepend($contents, $maxMemory = 8096)
     {
-        $test = self::EXISTS | self::READABLE | self::WRITABLE;
+        $test = \sndsgd\Fs::EXISTS | \sndsgd\Fs::READABLE | \sndsgd\Fs::WRITABLE;
         if ($this->test($test) === false) {
             $this->error = "failed to prepend file; {$this->error}";
             return false;
@@ -209,7 +220,7 @@ class File extends EntityAbstract
      * @param string $contents
      * @param int $len
      * @param int $endsize
-     * @return boolean
+     * @return bool
      */
     private function prependFileInPlace($contents, $len, $endsize)
     {
@@ -230,9 +241,9 @@ class File extends EntityAbstract
 
     /**
      * Convenience method for appending to a file
-     * 
+     *
      * @param string $contents The contents to append
-     * @return boolean
+     * @return bool
      */
     public function append($contents)
     {
@@ -243,13 +254,13 @@ class File extends EntityAbstract
      * Read the contents of the file
      *
      * @param int $offset The position to start reading from
-     * @return boolean|string
+     * @return bool|string
      * @return string The contents of the file on success
      * @return false If the file could not be read
      */
     public function read(int $offset = -1)
     {
-        if ($this->test(self::EXISTS | self::READABLE) === false) {
+        if ($this->test(\sndsgd\Fs::EXISTS | \sndsgd\Fs::READABLE) === false) {
             $this->error = "failed to read file; {$this->error}";
             return false;
         }
@@ -272,8 +283,8 @@ class File extends EntityAbstract
 
     /**
      * Delete the file
-     * 
-     * @return boolean
+     *
+     * @return bool
      */
     public function remove(): bool
     {
@@ -286,7 +297,7 @@ class File extends EntityAbstract
 
     /**
      * Get the number of lines in the file
-     * 
+     *
      * @return int
      */
     public function getLineCount():int

@@ -63,11 +63,11 @@ class ClassLocatorTest extends \PHPUnit_Framework_TestCase
     {
         $locator = new ClassLocator($this->createValidFilter());
         # search the repo root
-        $locator->searchDir(__DIR__."/../../..", false);
+        $locator->searchDir(__DIR__."/../../../..", false);
         # search the src directory recursively
-        $locator->searchDir(__DIR__."/../../../src", true);
+        $locator->searchDir(__DIR__."/../../../../src", true);
         # re-search to test dkipping already searched directories
-        $locator->searchDir(__DIR__."/../../../src", true);
+        $locator->searchDir(__DIR__."/../../../../src", true);
 
         # test getting a list of classes found
         foreach ($locator->getClasses() as $class) {

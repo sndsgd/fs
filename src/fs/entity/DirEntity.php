@@ -1,19 +1,15 @@
 <?php
 
-namespace sndsgd\fs;
+namespace sndsgd\fs\entity;
 
-use \Exception;
-use \InvalidArgumentException;
-
-
-class Dir extends EntityAbstract
+class DirEntity extends EntityAbstract
 {
     /**
      * {@inheritdoc}
      */
     public function test(int $opts): bool
     {
-        return parent::test($opts | self::DIR);
+        return parent::test($opts | \sndsgd\Fs::DIR);
     }
 
     /**
@@ -26,7 +22,7 @@ class Dir extends EntityAbstract
             $path = dirname($path);
         }
         $dir = new self($path);
-        return $dir->test(self::WRITABLE);
+        return $dir->test(\sndsgd\Fs::WRITABLE);
     }
 
     /**
@@ -35,7 +31,7 @@ class Dir extends EntityAbstract
     public function prepareWrite($mode = 0775)
     {
         if (file_exists($this->path)) {
-            return $this->test(self::WRITABLE);
+            return $this->test(\sndsgd\Fs::WRITABLE);
         }
         else if (mkdir($this->path, $mode, true) === false) {
             $this->setError("failed to create directory '{$this->path}'");
@@ -55,24 +51,24 @@ class Dir extends EntityAbstract
     public function getFile($filename)
     {
         if (!is_string($filename)) {
-            throw new InvalidArgumentException(
+            throw new \InvalidArgumentException(
                 "invalid value provided for 'filename'; ".
                 "expecting a string"
             );
         }
-        return new File($this->path.DIRECTORY_SEPARATOR.$filename);
+        return new FileEntity($this->path.DIRECTORY_SEPARATOR.$filename);
     }
 
     /**
      * Determine if a directory is empty
      *
-     * @return boolean
-     * @throws Exception If the directory does not exist or is not readable
+     * @return bool
+     * @throws \RuntimeException If the directory does not exist or is not readable
      */
     public function isEmpty()
     {
-        if ($this->test(self::EXISTS | self::READABLE) === false) {
-            throw new Exception(
+        if ($this->test(\sndsgd\Fs::EXISTS | \sndsgd\Fs::READABLE) === false) {
+            throw new \RuntimeException(
                 "failed to determine if a directory is empty; ".$this->getError()
             );
         }
@@ -99,7 +95,7 @@ class Dir extends EntityAbstract
                 continue;
             }
             $path = $this->path.DIRECTORY_SEPARATOR.$name;
-            $ret[] = (is_dir($path)) ? new Dir($path) : new File($path);
+            $ret[] = (is_dir($path)) ? new static($path) : new FileEntity($path);
         }
         return $ret;
     }
@@ -107,11 +103,11 @@ class Dir extends EntityAbstract
     /**
      * Recursively remove the directory
      *
-     * @return boolean
+     * @return bool
      */
     public function remove()
     {
-        if ($this->test(self::EXISTS | self::READABLE | self::WRITABLE) === false) {
+        if ($this->test(\sndsgd\Fs::EXISTS | \sndsgd\Fs::READABLE | \sndsgd\Fs::WRITABLE) === false) {
             $this->error = "failed to remove directory; {$this->error}";
             return false;
         }
