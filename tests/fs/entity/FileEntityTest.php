@@ -120,7 +120,7 @@ class FileEntityTest extends \sndsgd\fs\TestCase
      */
     public function testGetSize($byteSize, $precision, $decimal, $sep, $expect)
     {
-        $mock = $this->getMockBuilder("sndsgd\\fs\\File")
+        $mock = $this->getMockBuilder(\sndsgd\fs\entity\FileEntity::class)
             ->disableOriginalConstructor()
             ->setMethods(["getByteSize"])
             ->getMock();
@@ -297,7 +297,7 @@ class FileEntityTest extends \sndsgd\fs\TestCase
      */
     public function testWriteFailure()
     {
-        $mock = $this->getMockBuilder("sndsgd\\fs\\File")
+        $mock = $this->getMockBuilder(\sndsgd\fs\entity\FileEntity::class)
             ->setConstructorArgs([vfsStream::url("root/dir.--x/file.txt")])
             ->setMethods(["prepareWrite"])
             ->getMock();
@@ -354,7 +354,7 @@ class FileEntityTest extends \sndsgd\fs\TestCase
      */
     public function testPrependReadFailure()
     {
-        $mock = $this->getMockBuilder("sndsgd\\fs\\File")
+        $mock = $this->getMockBuilder(\sndsgd\fs\entity\FileEntity::class)
             ->setConstructorArgs([ vfsStream::url("root/file.-w-") ])
             ->setMethods(["test"])
             ->getMock();
@@ -367,7 +367,7 @@ class FileEntityTest extends \sndsgd\fs\TestCase
      */
     public function testPrependWriteFailure()
     {
-        $mock = $this->getMockBuilder("sndsgd\\fs\\File")
+        $mock = $this->getMockBuilder(\sndsgd\fs\entity\FileEntity::class)
             ->setConstructorArgs([ vfsStream::url("root/file.r--") ])
             ->setMethods(["test"])
             ->getMock();
@@ -421,7 +421,7 @@ class FileEntityTest extends \sndsgd\fs\TestCase
      */
     public function testReadFileGetContentsFailure()
     {
-        $mock = $this->getMockBuilder("sndsgd\\fs\\File")
+        $mock = $this->getMockBuilder(\sndsgd\fs\entity\FileEntity::class)
             ->setConstructorArgs([ vfsStream::url("root/dir.--x") ])
             ->setMethods(["test"])
             ->getMock();
@@ -439,6 +439,4 @@ class FileEntityTest extends \sndsgd\fs\TestCase
         $file = new FileEntity($path);
         $this->assertEquals($lines, $file->getLineCount());
     }
-
-
 }

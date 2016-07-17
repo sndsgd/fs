@@ -53,7 +53,7 @@ class TestCase extends \PHPUnit_Framework_TestCase
         $this->root->getChild("file.---")->chmod(0000);
 
         // reset the tracked temp files
-        $rc = new \ReflectionClass("sndsgd\\fs\\Temp");
+        $rc = new \ReflectionClass(\sndsgd\fs\Temp::class);
         $property = $rc->getProperty("entities");
         $property->setAccessible(true);
         $property->setValue([]);
