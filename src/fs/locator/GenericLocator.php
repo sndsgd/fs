@@ -46,7 +46,7 @@ class GenericLocator
         return $this;
     }
 
-    public function searchDir(string $dir, bool $recursive = false): GenericLocator
+    protected function getIterator(string $dir, bool $recursive = false): \Iterator
     {
         $opts = \RecursiveDirectoryIterator::SKIP_DOTS;
         $iterator = new \RecursiveDirectoryIterator($dir, $opts);
@@ -55,7 +55,12 @@ class GenericLocator
             $iterator = new \RecursiveIteratorIterator($iterator, $opts);
         }
 
-        foreach ($iterator as $entity) {
+        return $iterator;
+    }
+
+    public function searchDir(string $dir, bool $recursive = false): GenericLocator
+    {
+        foreach ($this->getIterator($dir, $recursive) as $entity) {
             $entity = \sndsgd\Fs::createFromSplFileInfo($entity);
             $path = $entity->getPath();
             if (
