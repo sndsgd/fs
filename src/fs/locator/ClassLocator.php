@@ -2,21 +2,14 @@
 
 namespace sndsgd\fs\locator;
 
-class ClassLocator
+class ClassLocator extends GenericLocator
 {
-    /**
-     * A map of directories already searched
-     *
-     * @var array<string,bool>
-     */
-    protected $searchedDirs = [];
-
     /**
      * A map of the classes found
      *
      * @var array<string,\ReflectionClass>
      */
-    protected $classes = [];
+    protected $results = [];
 
     /**
      * An optional callback for filtering classes
@@ -41,34 +34,12 @@ class ClassLocator
         $this->setFilter($filter);
     }
 
-    public function setFilter(callable $filter = null): ClassLocator
+    public function searchDir(
+        string $dir,
+        bool $recursive = false
+    ): LocatorInterface
     {
-        try {
-            $this->filterValidator->validate($filter);
-        } catch (\Exception $ex) {
-            throw new \InvalidArgumentException(null, 0, $ex);
-        }
-
-        $this->filter = $filter;
-        return $this;
-    }
-
-    public function searchDir(string $dir, bool $recursive = false): ClassLocator
-    {
-        if (isset($this->searchedDirs[$dir])) {
-            return $this;
-        }
-
-        $this->searchedDirs[$dir] = true;
-
-        $opts = \RecursiveDirectoryIterator::SKIP_DOTS;
-        $iterator = new \RecursiveDirectoryIterator($dir, $opts);
-        if ($recursive) {
-            $opts = \RecursiveIteratorIterator::SELF_FIRST;
-            $iterator = new \RecursiveIteratorIterator($iterator, $opts);
-        }
-
-        foreach ($iterator as $file) {
+        foreach ($this->getIterator($dir, $recursive) as $file) {
             $class = $this->getClassFromFile($file);
             if (!$class) {
                 continue;
@@ -76,11 +47,14 @@ class ClassLocator
 
             require_once $file->getPathName();
             $reflectionClass = new \ReflectionClass($class);
-            if ($this->filter && !call_user_func($this->filter, $reflectionClass)) {
+            if (
+                $this->filter &&
+                !call_user_func($this->filter, $reflectionClass)
+            ) {
                 continue;
             }
 
-            $this->classes[$class] = $reflectionClass;
+            $this->results[$class] = $reflectionClass;
         }
 
         return $this;
@@ -108,11 +82,11 @@ class ClassLocator
 
     public function getClasses(): array
     {
-        return array_keys($this->classes);
+        return array_keys($this->results);
     }
 
     public function getReflectionClasses(): array
     {
-        return array_values($this->classes);
+        return array_values($this->results);
     }
 }

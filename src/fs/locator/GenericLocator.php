@@ -2,14 +2,14 @@
 
 namespace sndsgd\fs\locator;
 
-class GenericLocator
+class GenericLocator extends LocatorAbstract
 {
     /**
      * The entities that were found
      *
      * @var array<string,\sndsgd\fs\entity\EntityInterface>
      */
-    protected $entities = [];
+    protected $results = [];
 
     /**
      * An optional callback for filtering classes
@@ -34,7 +34,7 @@ class GenericLocator
         $this->setFilter($filter);
     }
 
-    public function setFilter(callable $filter = null): GenericLocator
+    public function setFilter(callable $filter = null): LocatorInterface
     {
         try {
             $this->filterValidator->validate($filter);
@@ -46,30 +46,21 @@ class GenericLocator
         return $this;
     }
 
-    protected function getIterator(string $dir, bool $recursive = false): \Iterator
-    {
-        $opts = \RecursiveDirectoryIterator::SKIP_DOTS;
-        $iterator = new \RecursiveDirectoryIterator($dir, $opts);
-        if ($recursive) {
-            $opts = \RecursiveIteratorIterator::SELF_FIRST;
-            $iterator = new \RecursiveIteratorIterator($iterator, $opts);
-        }
-
-        return $iterator;
-    }
-
-    public function searchDir(string $dir, bool $recursive = false): GenericLocator
+    public function searchDir(
+        string $dir,
+        bool $recursive = false
+    ): LocatorInterface
     {
         foreach ($this->getIterator($dir, $recursive) as $entity) {
             $entity = \sndsgd\Fs::createFromSplFileInfo($entity);
             $path = $entity->getPath();
             if (
-                isset($this->entities[$path]) ||
+                isset($this->results[$path]) ||
                 ($this->filter && !call_user_func($this->filter, $entity))
             ) {
                 continue;
             }
-            $this->entities[$path] = $entity;
+            $this->results[$path] = $entity;
         }
 
         return $this;
@@ -77,11 +68,11 @@ class GenericLocator
 
     public function getPaths(): array
     {
-        return array_keys($this->entities);
+        return array_keys($this->results);
     }
 
     public function getEntities(): array
     {
-        return array_values($this->entities);
+        return array_values($this->results);
     }
 }
