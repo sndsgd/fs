@@ -92,5 +92,5 @@ interface EntityInterface
      * @param string $path
      * @return string
      */
-    public function getRelativePath($path): string;
+    public function getRelativePath(string $path): string;
 }

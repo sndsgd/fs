@@ -191,21 +191,29 @@ abstract class EntityAbstract implements EntityInterface
      * @param string $path
      * @return string
      */
-    public function getRelativePath($path): string
+    public function getRelativePath(string $path): string
     {
-        $path = (string) $path;
         $from = $this->path;
+
         $fromParts = explode("/", $from);
         $toParts = explode("/", $path);
         $max = max(count($fromParts), count($toParts));
         for ($i=0; $i<$max; $i++) {
-            if ($fromParts[$i] !== $toParts[$i]) {
+            if (
+                !isset($fromParts[$i]) ||
+                !isset($toParts[$i]) ||
+                $fromParts[$i] !== $toParts[$i]
+            ) {
                 break;
             }
         }
 
         $len = count($fromParts) - $i - 1;
         $path = array_slice($toParts, $i);
+        if ($len < 0) {
+            return implode("/", $path);
+        }
+
         return str_repeat("../", $len).implode("/", $path);
     }
 }

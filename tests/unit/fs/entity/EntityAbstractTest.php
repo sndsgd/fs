@@ -194,42 +194,68 @@ class EntityAbstractTest extends \sndsgd\fs\TestCase
 
     /**
      * @covers ::normalizeTo
+     * @dataProvider providerNormalizeTo
      */
-    public function testNormalizeTo()
+    public function testNormalizeTo($path, $dir, $expect)
     {
-        $dir = "/test/path";
+        $mock = $this->getMockedEntity($path);
+        $this->assertEquals($expect, $mock->normalizeTo($dir));
+    }
 
-        $mock = $this->getMockedEntity("/file.txt");
-        $this->assertEquals("/file.txt", $mock->normalizeTo($dir));
-
-        $mock = $this->getMockedEntity("../file.txt");
-        $this->assertEquals("/test/file.txt", $mock->normalizeTo($dir));
-
-        $mock = $this->getMockedEntity(".file.txt");
-        $this->assertEquals("/test/path/.file.txt", $mock->normalizeTo($dir));
+    public function providerNormalizeTo()
+    {
+        return [
+            [
+                "/file.txt",
+                "/test/path",
+                "/file.txt",
+            ],
+            [
+                "../file.txt",
+                "/test/path",
+                "/test/file.txt",
+            ],
+            [
+                ".file.txt",
+                "/test/path",
+                "/test/path/.file.txt",
+            ],
+        ];
     }
 
     /**
      * @covers ::getRelativePath
+     * @dataProvider providerGetRelativePath
      */
-    public function testGetRelativePath()
+    public function testGetRelativePath($from, $to, $expect)
     {
-        $from = "/one/two/file.txt";
-        $to = "/one/file.txt";
-        $expect = "../file.txt";
         $mock = $this->getMockedEntity($from);
         $this->assertEquals($expect, $mock->getRelativePath($to));
+    }
 
-        $from = "/a/b/c";
-        $to = "/x/y";
-        $expect = "../../x/y";
-        $mock = $this->getMockedEntity($from);
-        $this->assertEquals($expect, $mock->getRelativePath($to));
-
-        $from = "/la/dee/daa/123-music/";
-        $to = "/la/dee/daa/123-some/other/path.txt";
-        $expect = "../123-some/other/path.txt";
-        $mock = $this->getMockedEntity($from);
-        $this->assertEquals($expect, $mock->getRelativePath($to));
+    public function providerGetRelativePath()
+    {
+        return [
+            [
+                "/one/two/file.txt",
+                "/one/file.txt",
+                "../file.txt",
+            ],
+            [
+                "/a/b/c",
+                "/x/y",
+                "../../x/y",
+            ],
+            [
+                "/la/dee/daa/123-music/",
+                "/la/dee/daa/123-some/other/path.txt",
+                "../123-some/other/path.txt",
+            ],
+            [
+                "/a/b/c",
+                "/a/b/c/d/e/f",
+                "d/e/f",
+            ],
+        ];
     }
 }
