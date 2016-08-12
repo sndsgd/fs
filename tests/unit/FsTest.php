@@ -76,19 +76,25 @@ class FsTest extends \sndsgd\fs\TestCase
     }
 
     /**
+     * @covers ::dir
      * @covers ::getDir
      */
     public function testGetDir()
     {
+        $test = Fs::dir("/some/dir");
+        $this->assertInstanceOf(\sndsgd\fs\entity\DirEntity::class, $test);
         $test = Fs::getDir("/some/dir");
         $this->assertInstanceOf(\sndsgd\fs\entity\DirEntity::class, $test);
     }
 
     /**
+     * @covers ::file
      * @covers ::getFile
      */
     public function testGetFile()
     {
+        $test = Fs::file("/some/file.ext");
+        $this->assertInstanceOf(\sndsgd\fs\entity\FileEntity::class, $test);
         $test = Fs::getFile("/some/file.ext");
         $this->assertInstanceOf(\sndsgd\fs\entity\FileEntity::class, $test);
     }

@@ -76,7 +76,7 @@ class Fs
      * @param string $path
      * @return \sndsgd\fs\Dir
      */
-    public static function getDir(string $path): fs\entity\DirEntity
+    public static function dir(string $path): fs\entity\DirEntity
     {
         return (new fs\entity\DirEntity($path))->normalize();
     }
@@ -86,6 +86,22 @@ class Fs
      *
      * @param string $path
      * @return \sndsgd\fs\File
+     */
+    public static function file(string $path): fs\entity\FileEntity
+    {
+        return (new fs\entity\FileEntity($path))->normalize();
+    }
+
+    /**
+     * @deprecated use `\sndsgd\Fs::dir()` instead
+     */
+    public static function getDir(string $path): fs\entity\DirEntity
+    {
+        return (new fs\entity\DirEntity($path))->normalize();
+    }
+
+    /**
+     * @deprecated use `\sndsgd\Fs::file()` instead
      */
     public static function getFile(string $path): fs\entity\FileEntity
     {
