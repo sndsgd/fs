@@ -67,6 +67,26 @@ abstract class EntityAbstract implements EntityInterface
     }
 
     /**
+     * Get the parent directory name
+     *
+     * @return string
+     */
+    public function getDirname(): string
+    {
+        return dirname($this->path);
+    }
+
+    /**
+     * Retrieve the basename of the entity
+     *
+     * @return string
+     */
+    public function getBasename(): string
+    {
+        return basename($this->path);
+    }
+
+    /**
      * Perform type/permissions tests on an entity
      *
      * @param int $opts

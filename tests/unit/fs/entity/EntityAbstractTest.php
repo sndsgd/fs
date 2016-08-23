@@ -112,6 +112,46 @@ class EntityAbstractTest extends \sndsgd\fs\TestCase
     }
 
     /**
+     * @covers ::getDirname
+     * @dataProvider providerGetDirname
+     */
+    public function testGetDirname($path, $expect)
+    {
+        $mock = $this->getMockedEntity($path);
+        $this->assertSame($expect, $mock->getDirname());
+    }
+
+    public function providerGetDirname(): array
+    {
+        return [
+            ["/a/b/c/test", "/a/b/c"],
+            ["/a", "/"],
+            ["/", "/"],
+        ];
+    }
+
+    /**
+     * @covers ::getBasename
+     * @dataProvider providerGetBasename
+     */
+    public function testGetBasename($path, $expect)
+    {
+        $mock = $this->getMockedEntity($path);
+        $this->assertSame($expect, $mock->getBasename());
+    }
+
+    public function providerGetBasename(): array
+    {
+        return [
+            ["name", "name"],
+            ["/a/b/c", "c"],
+            ["/a/b/c/", "c"],
+            ["/a/b/c/name", "name"],
+            ["/a/b/c/.name", ".name"],
+        ];
+    }
+
+    /**
      * @covers ::getParent
      */
     public function testGetParent()
