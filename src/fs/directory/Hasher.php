@@ -53,18 +53,16 @@ class Hasher
     public function getHashes()
     {
         if (empty($this->hashes)) {
-            $iterator = $this->createIterator();
-            $this->hashes = $this->generateHashes($iterator);
+            $this->generateHashes();
         }
         return json_encode($this->hashes, \sndsgd\Json::HUMAN);
     }
 
     /**
      * Create an iterator for looping over files
-     *
-     * @return \RecursiveIteratorIterator
+     * Return type hint excluded for mocking in tests
      */
-    protected function createIterator(): \RecursiveIteratorIterator
+    protected function createIterator()
     {
         $options = \RecursiveDirectoryIterator::SKIP_DOTS;
         $iterator = new \RecursiveDirectoryIterator($this->dir, $options);
@@ -80,7 +78,6 @@ class Hasher
      */
     protected function generateHashes(): array
     {
-        $ret = [];
         $dirLength = strlen($this->dir);
         foreach ($this->createIterator() as $file) {
             if (!$file->isFile()) {
@@ -94,19 +91,21 @@ class Hasher
                 continue;
             }
 
+            # remove the relative directory from the file path
+            $path = substr($realpath, $dirLength);
+
             # map hashes by a lowercase version of the path
             # this should prevent issues caused by case sensitive filesystems
-            $path = substr($realpath, $dirLength);
             $lowerPath = strtolower($path);
-            if (isset($ret[$lowerPath])) {
+            if (isset($this->hashes[$lowerPath])) {
                 $message = "duplicate file encountered: $path ($lowerPath)";
                 throw new \RuntimeException($message);
             }
 
-            $ret[$lowerPath] = sha1_file($realpath);
+            $this->hashes[$lowerPath] = sha1_file($realpath);
         }
 
-        ksort($ret);
-        return $ret;
+        ksort($this->hashes);
+        return $this->hashes;
     }
 }

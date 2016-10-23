@@ -5,18 +5,12 @@
 (function() {
     $dir = __DIR__;
     do {
-        $search = [
-            $dir.DIRECTORY_SEPARATOR."bootstrap.php",
-            $dir.DIRECTORY_SEPARATOR."vendor".DIRECTORY_SEPARATOR."autoload.php",
-        ];
-
-        foreach ($search as $path) {
+        foreach (["$dir/bootstrap.php", "$dir/vendor/autoload.php"] as $path) {
             if (file_exists($path)) {
                 require_once $path;
                 return;
             }
         }
-
         $dir = dirname($dir);
     } while ($dir !== "/");
 
