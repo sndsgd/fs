@@ -26,5 +26,6 @@
         "psr-4": {
             "sndsgd\\": "src/"
         }
-    }
+    },
+    "bin": ["bin/dirhash"]
 }
