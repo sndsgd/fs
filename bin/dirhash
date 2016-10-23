@@ -1,0 +1,37 @@
+#!/usr/bin/env php
+<?php
+
+# find the application bootstrap or autoload script
+(function() {
+    $dir = __DIR__;
+    do {
+        foreach (["$dir/bootstrap.php", "$dir/vendor/autoload.php"] as $path) {
+            if (file_exists($path)) {
+                require_once $path;
+                return;
+            }
+        }
+        $dir = dirname($dir);
+    } while ($dir !== "/");
+
+    throw new RuntimeException("failed to locate bootstrap or autoload script");
+})();
+
+
+$dir = $argv[1] ?? "";
+if (empty($dir)) {
+    error("expecting a directory as the sole argument");
+}
+
+try {
+    $hasher = new sndsgd\fs\directory\Hasher($dir);
+    echo $hasher->getHash().PHP_EOL;
+} catch (Exception $ex) {
+    error($ex->getMessage());
+}
+
+function error(string $message)
+{
+    fwrite(STDERR, trim($message).PHP_EOL);
+    exit(1);
+}
