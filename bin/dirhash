@@ -23,9 +23,13 @@ if (empty($dir)) {
     error("expecting a directory as the sole argument");
 }
 
+# if a second parameter is supplied, show the list of individual file hashes
+$debug = $argv[2] ?? "";
+
 try {
     $hasher = new sndsgd\fs\directory\Hasher($dir);
-    echo $hasher->getHash().PHP_EOL;
+    echo ($debug) ? $hasher->getHashes() : $hasher->getHash();
+    echo PHP_EOL;
 } catch (Exception $ex) {
     error($ex->getMessage());
 }
