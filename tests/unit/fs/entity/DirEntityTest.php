@@ -74,13 +74,14 @@ class DirEntityTest extends \sndsgd\fs\TestCase
     }
 
     /**
-     * @covers ::getFile
-     * @expectedException InvalidArgumentException
+     * @covers ::getDir
      */
-    public function testGetFileException()
+    public function testGetDir()
     {
         $dir = new DirEntity("/test/dir");
-        $file = $dir->getFile([]);
+        $subdir = $dir->getDir("subdir");
+        $this->assertInstanceOf(\sndsgd\fs\entity\DirEntity::class, $subdir);
+        $this->assertEquals("/test/dir/subdir", $subdir->getPath());
     }
 
     /**
@@ -193,7 +194,7 @@ class DirEntityTest extends \sndsgd\fs\TestCase
             ->at($vdir)
             ->chmod(0700)
             ->chgrp(vfsStream::GROUP_ROOT)
-            ->chown(vfsStream::OWNER_ROOT);   
+            ->chown(vfsStream::OWNER_ROOT);
 
 
         $mock = $this->getMockBuilder(DirEntity::class)
@@ -221,7 +222,7 @@ class DirEntityTest extends \sndsgd\fs\TestCase
             ->at($vdir)
             ->chmod(0755)
             ->chgrp(vfsStream::GROUP_ROOT)
-            ->chown(vfsStream::OWNER_ROOT);   
+            ->chown(vfsStream::OWNER_ROOT);
 
 
         $mock = $this->getMockBuilder(DirEntity::class)

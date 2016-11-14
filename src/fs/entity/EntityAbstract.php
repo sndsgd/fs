@@ -11,14 +11,14 @@ abstract class EntityAbstract implements EntityInterface
 
     /**
      * The path as provided to the constructor
-     * 
+     *
      * @var string
      */
     protected $path;
 
     /**
      * Constructor
-     * 
+     *
      * @param string $path
      */
     public function __construct(string $path)
@@ -28,7 +28,7 @@ abstract class EntityAbstract implements EntityInterface
 
     /**
      * Get the path as a string
-     * 
+     *
      * @return string
      */
     public function __toString(): string
@@ -38,7 +38,7 @@ abstract class EntityAbstract implements EntityInterface
 
     /**
      * Determine whether the entity is a directory
-     * 
+     *
      * @return bool
      */
     public function isDir(): bool
@@ -48,7 +48,7 @@ abstract class EntityAbstract implements EntityInterface
 
     /**
      * Determine whether the entity is a file
-     * 
+     *
      * @return bool
      */
     public function isFile(): bool
@@ -58,7 +58,7 @@ abstract class EntityAbstract implements EntityInterface
 
     /**
      * Get the path as a string
-     * 
+     *
      * @return string
      */
     public function getPath(): string
@@ -123,7 +123,7 @@ abstract class EntityAbstract implements EntityInterface
 
     /**
      * Get the parent directory
-     * 
+     *
      * @return sndsgd\fs\Dir|null
      * @return sndsgd\fs\Dir The parent directory
      * @return null The entity has no parent
@@ -147,7 +147,7 @@ abstract class EntityAbstract implements EntityInterface
 
     /**
      * Normalize a path to remove dots
-     * 
+     *
      * @return \sndsgd\fs\EntityInterface
      */
     public function normalize(): EntityInterface
@@ -199,7 +199,7 @@ abstract class EntityAbstract implements EntityInterface
     public function normalizeTo($dir)
     {
         if ($this->isAbsolute()) {
-            return $this->path;   
+            return $this->path;
         }
         $this->path = "$dir/$this->path";
         return $this->normalize();
@@ -207,7 +207,7 @@ abstract class EntityAbstract implements EntityInterface
 
     /**
      * Get the relative path from the current path to another
-     * 
+     *
      * @param string $path
      * @return string
      */

@@ -45,18 +45,23 @@ class DirEntity extends EntityAbstract
     /**
      * Get an instance of \sndsgd\fs\File for a file in this directory
      *
-     * @param string $filename The name of the file in the directory
-     * @return \sndsgd\fs\File
+     * @param string $name The name of the file in the directory
+     * @return \sndsgd\fs\entity\FileEntity
      */
-    public function getFile($filename)
+    public function getFile(string $name): FileEntity
     {
-        if (!is_string($filename)) {
-            throw new \InvalidArgumentException(
-                "invalid value provided for 'filename'; ".
-                "expecting a string"
-            );
-        }
-        return new FileEntity($this->path.DIRECTORY_SEPARATOR.$filename);
+        return new FileEntity($this->path.DIRECTORY_SEPARATOR.$name);
+    }
+
+    /**
+     * Retrieve a subdirectory of the current directory
+     *
+     * @param string $name The name of the sub directory
+     * @return \sndsgd\fs\entity\DirEntity
+     */
+    public function getDir(string $name): DirEntity
+    {
+        return new DirEntity($this->path.DIRECTORY_SEPARATOR.$name);
     }
 
     /**
