@@ -159,7 +159,7 @@ class FileEntity extends EntityAbstract
      * @param int $opts Bitmask options to pass to `file_put_contents`
      * @return bool
      */
-    public function write($contents, $opts = 0): bool
+    public function write(string $contents, int $opts = 0): bool
     {
         if ($this->prepareWrite() !== true) {
             $this->error = "failed to write '{$this->path}; {$this->error}";
@@ -173,7 +173,7 @@ class FileEntity extends EntityAbstract
      * @param int $opts
      * @return bool
      */
-    private function writeFile($contents, $opts)
+    private function writeFile(string $contents, int $opts = 0): bool
     {
         if (@file_put_contents($this->path, $contents, $opts) === false) {
             $this->setError("file to write '{$this->path}'");
@@ -189,7 +189,7 @@ class FileEntity extends EntityAbstract
      * @param int $maxMemory The max number of bytes to consume
      * @return bool
      */
-    public function prepend($contents, $maxMemory = 8096)
+    public function prepend(string $contents, int $maxMemory = 8096): bool
     {
         $test = \sndsgd\Fs::EXISTS | \sndsgd\Fs::READABLE | \sndsgd\Fs::WRITABLE;
         if ($this->test($test) === false) {
@@ -207,12 +207,14 @@ class FileEntity extends EntityAbstract
         }
 
         # use file_get/put_contents to handle the operation
-        else if (($tmp = $this->readFile(-1)) === false) {
+        if (($tmp = $this->readFile(0)) === false) {
             return false;
         }
-        else if ($this->writeFile($contents.$tmp, 0) === false) {
+
+        if ($this->writeFile($contents.$tmp, 0) === false) {
             return false;
         }
+
         return true;
     }
 
@@ -222,7 +224,11 @@ class FileEntity extends EntityAbstract
      * @param int $endsize
      * @return bool
      */
-    private function prependFileInPlace($contents, $len, $endsize)
+    private function prependFileInPlace(
+        string $contents,
+        int $len,
+        int $endsize
+    ): bool
     {
         $fh = fopen($this->path, "r+");
         $oldcontent = fread($fh, $len);
@@ -245,7 +251,7 @@ class FileEntity extends EntityAbstract
      * @param string $contents The contents to append
      * @return bool
      */
-    public function append($contents)
+    public function append(string $contents): bool
     {
         return $this->write($contents, FILE_APPEND);
     }
@@ -258,7 +264,7 @@ class FileEntity extends EntityAbstract
      * @return string The contents of the file on success
      * @return false If the file could not be read
      */
-    public function read(int $offset = -1)
+    public function read(int $offset = 0)
     {
         if ($this->test(\sndsgd\Fs::EXISTS | \sndsgd\Fs::READABLE) === false) {
             $this->error = "failed to read file; {$this->error}";
@@ -300,7 +306,7 @@ class FileEntity extends EntityAbstract
      *
      * @return int
      */
-    public function getLineCount():int
+    public function getLineCount(): int
     {
         $ret = 0;
         $fh = fopen($this->path, "r");

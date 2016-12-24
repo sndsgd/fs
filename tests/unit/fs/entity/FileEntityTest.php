@@ -328,7 +328,7 @@ class FileEntityTest extends \sndsgd\fs\TestCase
 
     private function preparePrependTest($len)
     {
-        $path = vfsStream::url("root/ile.txt");
+        $path = vfsStream::url("root/file.txt");
         $contents = \sndsgd\Str::random($len);
         file_put_contents($path, $contents);
         $str = \sndsgd\Str::random(100);
