@@ -4,9 +4,11 @@ php:
   - 7.0
   - 7.1
 
+install:
+  - composer install --no-interaction --prefer-source --dev
+
 script:
-  - composer install
-  - phpunit --coverage-clover build/coverage/clover.xml
+  - phpunit --coverage-clover tests/coverage/clover.xml
 
 after_script:
   - vendor/bin/coveralls -v
