@@ -45,7 +45,7 @@ class HasherTest extends \PHPUnit_Framework_TestCase
         return [
             [
                 __DIR__."/../../../data/hash",
-                "d15214d85d1f604533db68366dadbbb0a8e9ee08",
+                "06c3a47dc82d048059a8aefbfd2a95db50e434ed",
             ],
         ];
     }
