@@ -73,18 +73,24 @@ class TempTest extends TestCase
      * @covers ::createFile
      * @dataProvider providerCreateFile
      */
-    public function testCreateFile($tmpdir, $prefix)
+    public function testCreateFile($tmpdir, $name, $beginsWith, $endsWith)
     {
         Temp::setDir($tmpdir);
-        $file = Temp::createFile($prefix);
-        $this->assertInstanceOf(\sndsgd\fs\entity\FileEntity::class, $file);
-        $this->assertSame(0, strpos($file, "$tmpdir/$prefix-"));
+        $file = Temp::createFile($name);
+        $this->assertTrue(Str::beginsWith($file, $beginsWith));
+        if ($endsWith) {
+            $this->assertTrue(Str::endsWith($file, $endsWith));
+        }
     }
 
     public function providerCreateFile()
     {
+        $tmpdir = vfsStream::url("root/dir.rwx");
+        $rand = Str::random(10);
+
         return [
-            [vfsStream::url("root/dir.rwx"), Str::random(10), 1],
+            [$tmpdir, $rand, "$tmpdir/$rand-", ""],
+            [$tmpdir, "$rand.ext", "$tmpdir/$rand-", ".ext"],
         ];
     }
 

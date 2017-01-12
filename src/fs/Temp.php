@@ -6,7 +6,7 @@ namespace sndsgd\fs;
  * Temp file and directory utility methods
  *
  * Note: the creation of both directores and files is done from this class
- * so any created paths can be registered for deletion. Otherwise you would 
+ * so any created paths can be registered for deletion. Otherwise you would
  * be able to register any filesystem entity to be deleted on script exit.
  */
 class Temp
@@ -94,15 +94,23 @@ class Temp
      * Create a temp file
      *
      * @param string $prefix A prefix for the filename
-     * @return \sndsgd\fs\File
+     * @return \sndsgd\fs\entity\FileEntity
      */
     public static function createFile(
-        string $prefix,
+        string $name,
         int $maxAttempts = 10
     ): entity\FileEntity
     {
         $tmpdir = static::getDir();
-        $prefix = \sndsgd\Fs::sanitizeName($prefix);
+        $name = \sndsgd\Fs::sanitizeName($name);
+        $pos = strrpos($name, ".");
+        if ($pos === false) {
+            $extension = "";
+        } else {
+            $extension = substr($name, $pos);
+            $name = substr($name, 0, $pos);
+        }
+
         $attempts = 1;
         do {
             if ($attempts > $maxAttempts) {
@@ -112,7 +120,7 @@ class Temp
                 );
             }
             $rand = \sndsgd\Str::random(10);
-            $path = "$tmpdir/$prefix-$rand";
+            $path = "$tmpdir/$name-$rand$extension";
             $attempts++;
         }
         while (file_exists($path));
