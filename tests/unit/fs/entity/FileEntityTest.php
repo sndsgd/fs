@@ -148,8 +148,6 @@ class FileEntityTest extends \sndsgd\fs\TestCase
         return $ret;
     }
 
-
-
     /**
      * @covers ::canWrite
      * @dataProvider providerCanWrite
@@ -238,6 +236,30 @@ class FileEntityTest extends \sndsgd\fs\TestCase
             [".hidden", "ext", "ext"],
             [".hidden.txt", null, "txt"],
             [".hidden.txt", "ext", "txt"],
+        ];
+    }
+
+    /**
+     * @covers ::getName
+     * @dataProvider providerGetName
+     */
+    public function testGetName($test, $includeExtension, $expect)
+    {
+        $file = new FileEntity($test);
+        $this->assertSame($expect, $file->getName($includeExtension));
+    }
+
+    public function providerGetName(): array
+    {
+        return [
+            ["filename.ext", false, "filename"],
+            ["filename.ext", true, "filename.ext"],
+            [".hidden.ext", false, ".hidden"],
+            [".hidden.ext", true, ".hidden.ext"],
+            ["/some/path/filename.ext", false, "filename"],
+            ["/some/path/filename.ext", true, "filename.ext"],
+            ["/some/path/.hidden.ext", false, ".hidden"],
+            ["/some/path/.hidden.ext", true, ".hidden.ext"],
         ];
     }
 

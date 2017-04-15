@@ -70,11 +70,23 @@ class FileEntity extends EntityAbstract
      */
     public function getExtension(string $default = ""): string
     {
+        $extension = $this->splitName()[1];
+        return ($extension === "") ? $default : $extension;
+    }
+
+    /**
+     * Retrieve the file name with or without an extension
+     *
+     * @return string
+     */
+    public function getName(bool $includeExtension = false): string
+    {
         $filename = basename($this->path);
-        $extpos = strrpos($filename, ".");
-        return ($extpos === false || $extpos === 0)
-            ? $default
-            : substr($filename, $extpos + 1);
+        if ($includeExtension) {
+            return $filename;
+        }
+
+        return $this->splitName()[0];
     }
 
     /**
