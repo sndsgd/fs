@@ -9,6 +9,13 @@ abstract class LocatorAbstract implements LocatorInterface
         bool $recursive = false
     ): \Iterator
     {
+        $dir = \sndsgd\Fs::dir($dir);
+        if (!$dir->test(\sndsgd\Fs::EXISTS | \sndsgd\Fs::READABLE)) {
+            throw new \RuntimeException(
+                "failed to search directory; ".$dir->getError()
+            );
+        }
+
         $opts = \RecursiveDirectoryIterator::SKIP_DOTS;
         $iterator = new \RecursiveDirectoryIterator($dir, $opts);
         if ($recursive) {
