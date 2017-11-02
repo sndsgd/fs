@@ -5,7 +5,7 @@ namespace sndsgd\fs\entity;
 class DirEntity extends EntityAbstract
 {
     /**
-     * {@inheritdoc}
+     * @inheritDoc
      */
     public function test(int $opts): bool
     {
@@ -13,7 +13,7 @@ class DirEntity extends EntityAbstract
     }
 
     /**
-     * {@inheritdoc}
+     * @inheritDoc
      */
     public function canWrite()
     {
@@ -26,7 +26,7 @@ class DirEntity extends EntityAbstract
     }
 
     /**
-     * {@inheritdoc}
+     * @inheritDoc
      */
     public function prepareWrite($mode = 0775)
     {
@@ -110,7 +110,7 @@ class DirEntity extends EntityAbstract
      *
      * @return bool
      */
-    public function remove()
+    public function remove(): bool
     {
         if ($this->test(\sndsgd\Fs::EXISTS | \sndsgd\Fs::READABLE | \sndsgd\Fs::WRITABLE) === false) {
             $this->error = "failed to remove directory; {$this->error}";

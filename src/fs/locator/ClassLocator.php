@@ -21,7 +21,7 @@ class ClassLocator extends GenericLocator
     /**
      * A validator for testing the filter
      *
-     * @var \ClassLoaderFilterValidator
+     * @var \sndsgd\fs\locator\ClassLocatorFilterValidator
      */
     protected $filterValidator;
 
@@ -66,7 +66,7 @@ class ClassLocator extends GenericLocator
             return "";
         }
 
-        $file = new \sndsgd\fs\entity\FileEntity($file);
+        $file = new \sndsgd\fs\entity\FileEntity((string) $file);
         $extension = $file->getExtension();
         if (strtolower($extension) !== "php") {
             return "";

@@ -124,9 +124,7 @@ abstract class EntityAbstract implements EntityInterface
     /**
      * Get the parent directory
      *
-     * @return sndsgd\fs\Dir|null
-     * @return sndsgd\fs\Dir The parent directory
-     * @return null The entity has no parent
+     * @return \sndsgd\fs\entity\DirEntity|null
      */
     public function getParent()
     {
@@ -138,7 +136,7 @@ abstract class EntityAbstract implements EntityInterface
     }
 
     /**
-     * {@inheritdoc}
+     * @inheritDoc
      */
     public function isAbsolute(): bool
     {
@@ -146,9 +144,7 @@ abstract class EntityAbstract implements EntityInterface
     }
 
     /**
-     * Normalize a path to remove dots
-     *
-     * @return \sndsgd\fs\EntityInterface
+     * @inheritDoc
      */
     public function normalize(): EntityInterface
     {
@@ -194,7 +190,7 @@ abstract class EntityAbstract implements EntityInterface
     }
 
     /**
-     * {@inheritdoc}
+     * @inheritDoc
      */
     public function normalizeTo($dir)
     {

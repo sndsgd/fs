@@ -5,7 +5,7 @@ namespace sndsgd\fs\entity;
 class FileEntity extends EntityAbstract
 {
     /**
-     * {@inheritdoc}
+     * @inheritDoc
      */
     public function test(int $opts): bool
     {
@@ -13,7 +13,7 @@ class FileEntity extends EntityAbstract
     }
 
     /**
-     * {@inheritdoc}
+     * @inheritDoc
      */
     public function canWrite(): bool
     {
@@ -24,7 +24,7 @@ class FileEntity extends EntityAbstract
     }
 
     /**
-     * {@inheritdoc}
+     * @inheritDoc
      */
     public function prepareWrite($mode = 0775): bool
     {
@@ -45,7 +45,7 @@ class FileEntity extends EntityAbstract
      * Get the file's parent directory
      *
      * @aliasof ::getParent
-     * @return \sndsgd\fs\Dir
+     * @return \sndsgd\fs\entity\DirEntity
      */
     public function getDir(): DirEntity
     {
