@@ -74,7 +74,7 @@ class Fs
      * Convenience method to get a directory instance with a normalized path
      *
      * @param string $path
-     * @return \sndsgd\fs\Dir
+     * @return \sndsgd\fs\entity\DirEntity
      */
     public static function dir(string $path): fs\entity\DirEntity
     {
@@ -85,25 +85,9 @@ class Fs
      * Convenience method to get a file instance with a normalized path
      *
      * @param string $path
-     * @return \sndsgd\fs\File
+     * @return \sndsgd\fs\entity\FileEntity
      */
     public static function file(string $path): fs\entity\FileEntity
-    {
-        return (new fs\entity\FileEntity($path))->normalize();
-    }
-
-    /**
-     * @deprecated use `\sndsgd\Fs::dir()` instead
-     */
-    public static function getDir(string $path): fs\entity\DirEntity
-    {
-        return (new fs\entity\DirEntity($path))->normalize();
-    }
-
-    /**
-     * @deprecated use `\sndsgd\Fs::file()` instead
-     */
-    public static function getFile(string $path): fs\entity\FileEntity
     {
         return (new fs\entity\FileEntity($path))->normalize();
     }
@@ -112,7 +96,7 @@ class Fs
      * Create an entity from an instance of \SplFileInfo
      *
      * @param \SplFileInfo $info
-     * @return \sndsgd\fs\EntityInterface
+     * @return \sndsgd\fs\entity\EntityInterface
      */
     public static function createFromSplFileInfo(\SplFileInfo $info)
     {

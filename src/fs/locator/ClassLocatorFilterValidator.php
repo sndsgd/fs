@@ -28,7 +28,7 @@ class ClassLocatorFilterValidator
         return true;
     }
 
-    private function validateSignature(callable $filter = null)
+    private function validateSignature(callable $filter)
     {
         $reflection = new \ReflectionFunction($filter);
         if ($reflection->getNumberOfParameters() !== 1) {

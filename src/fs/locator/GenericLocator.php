@@ -21,7 +21,7 @@ class GenericLocator extends LocatorAbstract
     /**
      * A validator for testing the filter
      *
-     * @var \GenericLocatorFilterValidator
+     * @var \sndsgd\fs\locator\GenericLocatorFilterValidator
      */
     protected $filterValidator;
 
@@ -39,7 +39,7 @@ class GenericLocator extends LocatorAbstract
         try {
             $this->filterValidator->validate($filter);
         } catch (\Exception $ex) {
-            throw new \InvalidArgumentException(null, 0, $ex);
+            throw new \InvalidArgumentException("", 0, $ex);
         }
 
         $this->filter = $filter;

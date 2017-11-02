@@ -147,8 +147,8 @@ class TempTest extends TestCase
 
     public function providerRegisterEntity()
     {
-        $dir = \sndsgd\Fs::getDir("/path/to/dir");
-        $file = \sndsgd\Fs::getFile("/path/to/file.txt");
+        $dir = \sndsgd\Fs::dir("/path/to/dir");
+        $file = \sndsgd\Fs::file("/path/to/file.txt");
 
         return [
             [[$dir]],
