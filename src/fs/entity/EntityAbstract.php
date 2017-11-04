@@ -148,9 +148,16 @@ abstract class EntityAbstract implements EntityInterface
      */
     public function normalize(): EntityInterface
     {
-        $path = rtrim($this->path, DIRECTORY_SEPARATOR);
-        if ($path{0} === ".") {
+        $path = rtrim($this->path, "/");
+
+        if ($path[0] === ".") {
             $path = $this->normalizeLeadingDots($path);
+        }
+
+        # if the first char is not a dot or a directory separator, assume
+        # the path is to file or directory in the current working directory
+        elseif ($path[0] !== "/") {
+            $path = getcwd()."/$path";
         }
 
         $parts = explode("/", $path);
@@ -160,7 +167,7 @@ abstract class EntityAbstract implements EntityInterface
             if ($part === "." || $part === "") {
                 continue;
             }
-            else if ($part === "..") {
+            elseif ($part === "..") {
                 array_pop($temp);
             }
             else {
@@ -177,13 +184,16 @@ abstract class EntityAbstract implements EntityInterface
         if ($path === ".") {
             return getcwd();
         }
-        else if ($path === "..") {
+        elseif ($path === "..") {
             return dirname(getcwd());
         }
-        else if ($path{1} === "/") {
+        elseif ($path[0] === "." && $path[1] !== "." && $path[1] !== "/") {
+            return getcwd()."/".$path;
+        }
+        elseif ($path[1] === "/") {
             $path = getcwd().substr($path, 1);
         }
-        else if ($path{1} === ".") {
+        elseif ($path[1] === ".") {
             $path = dirname(getcwd()).substr($path, 2);
         }
         return $path;

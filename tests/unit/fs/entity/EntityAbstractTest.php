@@ -192,44 +192,33 @@ class EntityAbstractTest extends \sndsgd\fs\TestCase
     /**
      * @covers ::normalize
      * @covers ::normalizeLeadingDots
+     * @dataProvider provideNormalize
      */
-    public function testNormalize()
+    public function testNormalize($path, $expect)
+    {
+        $mock = $this->getMockedEntity($path);
+        $this->assertEquals($expect, $mock->normalize());
+    }
+
+    public function provideNormalize(): array
     {
         $cwd = getcwd();
         $dir = dirname($cwd);
 
-        $mock = $this->getMockedEntity(".file.txt");
-        $this->assertEquals(".file.txt", $mock->normalize());
-
-        $mock = $this->getMockedEntity("/tmp///path/.//file.txt");
-        $this->assertEquals("/tmp/path/file.txt", $mock->normalize());
-
-        $mock = $this->getMockedEntity("/tmp/path/../file.txt");
-        $this->assertEquals("/tmp/file.txt", $mock->normalize());
-
-        $mock = $this->getMockedEntity("/tmp/test/path/../../file.txt");
-        $this->assertEquals("/tmp/file.txt", $mock->normalize());
-
-        $mock = $this->getMockedEntity("test/./path/one/..");
-        $this->assertEquals("test/path", $mock->normalize());
-
-        $mock = $this->getMockedEntity(".");
-        $this->assertEquals($cwd, $mock->normalize());
-
-        $mock = $this->getMockedEntity("./");
-        $this->assertEquals($cwd, $mock->normalize());
-
-        $mock = $this->getMockedEntity("./test");
-        $this->assertEquals("$cwd/test", $mock->normalize());
-
-        $mock = $this->getMockedEntity("../test");
-        $this->assertEquals("$dir/test", $mock->normalize());
-
-        $mock = $this->getMockedEntity("..");
-        $this->assertEquals($dir, $mock->normalize());
-
-        $mock = $this->getMockedEntity("../");
-        $this->assertEquals($dir, $mock->normalize());
+        return [
+            [".", $cwd],
+            ["./", $cwd],
+            ["..", $dir],
+            ["../", $dir],
+            ["./test", "$cwd/test"],
+            ["../test", "$dir/test"],
+            [".file.txt", "$cwd/.file.txt"],
+            ["test", "$cwd/test"],
+            ["/tmp///path/.//file.txt", "/tmp/path/file.txt"],
+            ["/tmp/path/../file.txt", "/tmp/file.txt"],
+            ["/tmp/test/path/../../file.txt", "/tmp/file.txt"],
+            ["/test/./path/one/..", "/test/path"],
+        ];
     }
 
     /**
